@@ -5,13 +5,21 @@ import json
 from django.shortcuts import render
 from django import http
 from django import template
+from .forms import UploadFileForm
 # this module
 import fbackend
+
+
+TMP_FILENAME = 'kfits.txt'
+
+
+def _get_tmp_dir():
+    return os.environ.get('TEMP', os.environ.get('TMP', '/tmp'))
 
 # Create your views here.
 def index(request):
     tmplt = template.loader.get_template('fitter/index.htm')
-    return http.HttpResponse(tmplt.render({}, request))
+    return http.HttpResponse(tmplt.render(dict(tmp_file = os.path.join(_get_tmp_dir(), TMP_FILENAME)), request))
 
 def test(request):
     tmplt = template.loader.get_template('fitter/test.htm')
@@ -26,7 +34,7 @@ def backend(request):
         params = dict(request.GET)
         func = getattr(fbackend, params.pop('function')[0])
         # run function
-        print func, params
+        params.pop('_', None)
         res = func(**params)
         if res[0]:
             new_res = res[1:]
@@ -36,6 +44,22 @@ def backend(request):
             return http.HttpResponse(json.dumps(new_res), "application/json")
         else:
             # return output
-            return http.HttpResponse(res[1], res[2])
+            response = http.HttpResponse(res[1], res[2])
+            if len(res) > 3:
+                response['Content-Disposition'] = 'attachment; filename="%s"' % res[3];
+            return response
     else:
         return http.HttpResponseBadRequest()
+
+def upload_text(request):
+    if request.method == 'POST':
+        form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            fname = os.path.join(_get_tmp_dir(), TMP_FILENAME)
+            f = file(fname, 'w')
+            for chunk in request.FILES['fdata'].chunks():
+                f.write(chunk)
+            return http.HttpResponse(json.dumps(fname), "application/json")
+    else:
+        return render(request, 'upload.htm', {'form': UploadFileForm()})
+    return http.HttpResponse(json.dumps(False), "application/json")

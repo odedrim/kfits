@@ -19,7 +19,7 @@ def check_input_file(fnames):
         return TO_JSON, False, "I am not allowed to read files bigger than %.1f MB" % (MAX_FILE_SIZE / 1048576.)
     data = file(fname,'rb').read()
     if 'XYDATA' not in data:
-        return TO_JSON, False, "This file does not seem to contain aggregation data in CSV format."
+        return TO_JSON, False, "This file does not seem to contain aggregation data in CSV or TXT format."
     # if we got all the way here...
     return TO_JSON, True, "OK"
 
@@ -62,10 +62,7 @@ def fit_data(fnames, threshold_points=None, rev_threshold_points=None, approx_st
     adata = scipy.array(data).T
     return TO_JSON, tfitter.plot_two_to_svg(adata[0], adata[1], [0.5*i for i in xrange(len(sim_data))], sim_data), RETTYPE
 
-def clean_data(fnames, noise_threshold, threshold_points=None, rev_threshold_points=None, approx_start=None):
-    # prepare return type
-    TO_JSON = True
-    RETM = "OK"
+def _clean_data(fnames, noise_threshold, threshold_points=None, rev_threshold_points=None, approx_start=None):
     # parse parameters
     noise_threshold = int(noise_threshold[0])
     # run fitting
@@ -77,11 +74,43 @@ def clean_data(fnames, noise_threshold, threshold_points=None, rev_threshold_poi
     adata = scipy.array(new_data).T
     # write to file
     base_fname = fnames[0].rsplit('.',1)[0]
-    cleaned_fname = base_fname + time.strftime('_clean_%y%m%d_%H%M%S_threshold_') + str(noise_threshold) + '.csv'
-    w = file(cleaned_fname, 'w')
-    w.write('XYDATA,values\n')
-    for x,y in new_data:
-        w.write('%f,%f\n' % (x,y-baseline))
-    w.close()
+##    cleaned_fname = base_fname + time.strftime('_clean_%y%m%d_%H%M%S_threshold_') + str(noise_threshold) + '.csv'
+##    w = file(cleaned_fname, 'w')
+##    w.write('XYDATA,values\n')
+##    for x,y in new_data:
+##        w.write('%f,%f\n' % (x,y-baseline))
+##    w.close()
+    return adata, new_data, baseline
+
+def clean_data(fnames, noise_threshold, threshold_points=None, rev_threshold_points=None, approx_start=None):
+    # prepare return type
+    TO_JSON = True
+    RETM = "OK"
+    # run clean
+    adata, new_data, baseline = _clean_data(fnames, noise_threshold, threshold_points, rev_threshold_points, approx_start)
     # return clean figure and fitting parameters
-    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), 1, 2, 3, 4, cleaned_fname], RETM
+    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), 1, 2, 3, 4], RETM
+
+def get_clean_data(fnames, noise_threshold, output_fnames, threshold_points=None, rev_threshold_points=None, approx_start=None):
+    # prepare return type
+    TO_JSON = False
+    RETTYPE = 'text/plain'
+    # run clean
+    adata, new_data, baseline = _clean_data(fnames, noise_threshold, threshold_points, rev_threshold_points, approx_start)
+    # prepare file
+    new = ['XYDATA,values']
+    for x,y in new_data:
+        new.append('%f,%f' % (x,y-baseline))
+    # return clean figure and fitting parameters
+    return TO_JSON, '\n'.join(new), RETTYPE, output_fnames[0]
+
+
+#########################
+# Non-algorithmic Stuff #
+#########################
+
+def get_email_oded():
+    return False, '.'.join(('oded','rimon123mail','huji','ac','il')), 'text/plain'
+
+def get_email_dana():
+    return False, '.'.join(('danare123mail','huji','ac','il')), 'text/plain'
