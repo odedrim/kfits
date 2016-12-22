@@ -48,3 +48,7 @@ input {
     margin: 100px;
     display: none;
 }
+
+.hidden {
+    display: none;
+}
