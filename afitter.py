@@ -42,7 +42,7 @@ def check_threshold(point, threshold_points):
 
 def parse_fluorometer_csv(path, threshold_points=None, rev_threshold_points=None, debug=False):
     """
-    Parse a CSV file created by the fluorometer.
+    Parse a CSV or TXT file created by the fluorometer.
 
     @param path: The path of the file
     @type path: str
@@ -64,6 +64,11 @@ def parse_fluorometer_csv(path, threshold_points=None, rev_threshold_points=None
     retval = []
     started = False
     ended = False
+    ncomma, ntab, nlines = data.count(','), data.count('\t'), data.count('\n')
+    if ncomma < ntab and ntab > nlines / 2.:
+        sep = '\t'
+    else:
+        sep = ','
     for line in data.splitlines():
         if line.startswith('XYDATA'):
             started = True
@@ -71,7 +76,7 @@ def parse_fluorometer_csv(path, threshold_points=None, rev_threshold_points=None
             if line.strip() == "":
                 ended = True
             else:
-                retval.append(tuple(map(float, line.split(','))))
+                retval.append(tuple(map(float, line.split(sep))))
     if not threshold_points and not rev_threshold_points:
         return retval
     else:

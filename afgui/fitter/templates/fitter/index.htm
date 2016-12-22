@@ -58,7 +58,7 @@
             <li class="dropdown">
               <a class="clickable dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Other Software <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="../cleaner">Aggregation Data Cleaner</a></li>
+                <!--li><a href="../cleaner">Aggregation Data Cleaner</a></li-->
                 <li role="separator" class="divider"></li>
                 <li class="dropdown-header">For Download</li>
                 <li><a href="http://www.reichmannlab.com/softwares">Predictor of Hsp33-binding peptides</a></li>
@@ -91,13 +91,17 @@
       <div class="page-header">
         <h1>Load Data</h1>
       </div>
-      <p>
-        <input type="text" name="input_path" id="input_path" value="C:\Users\oded\Dropbox\Lab\Reichmann\Results\Aggregation Assays\161006_Chemical_CS\rev_red.csv" style="width:70%" autocomplete="off" placeholder="Input File Path">&nbsp;
-        <button id="input_check" type="button" class="btn btn-primary">Check</button>
-        <button id="input_run" type="button" class="btn btn-success">Run</button>
-        <button id="input_clear" type="button" class="btn btn-danger">Clear</button>
-        <br>
-        <span id="input_message_user" style="font-size:11px; color:red;"></span>
+        <form enctype="multipart/form-data">
+            {% csrf_token %}
+            <input id="fdata" name="fdata" type="file" class="btn btn-primary" style="display:inline-block;" />
+            <button id="upload" type="button" class="btn btn-primary">Upload</button>
+            <input type="text" name="input_path" id="input_path" class="hidden" value="{{ tmp_file }}" style="width:70%" autocomplete="off" placeholder="Input File Path" />
+            <!--button id="input_check" type="button" class="btn btn-primary">Check</button -->
+            <!--button id="input_run" type="button" class="btn btn-success">Run</button -->
+            <button id="input_clear" type="button" class="btn btn-danger">Clear</button>
+        </form>
+      <br></p><p>
+        <span id="input_message_user" class="hidden" role="alert"></span>
       </p>
 
       <div class="page-header">
@@ -164,6 +168,7 @@
             Noise Threshold:&nbsp;&nbsp;&nbsp;&nbsp;<input id="threshold" style="width:50px;" value="15" />
             <button id="clean_data" type="button" class="btn btn-info" style="width:100%;">Clean Data</button>
             <div id="fig4" style="margin-top:10px;"></div>
+            <button id="get_clean_data" type="button" class="btn btn-success" style="width:100%;">Download Clean Data</button>
         </div>
         <div class="col-md-6">
           <table class="table table-condensed">
@@ -195,96 +200,7 @@
         </div>
       </div>
 
-      <div class="page-header">
-        <h1>Dropdown menus</h1>
-      </div>
-      <div class="dropdown theme-dropdown clearfix">
-        <a id="dropdownMenu1" href="#" class="sr-only dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-          <li class="active"><a href="#">Action</a></li>
-          <li><a href="#">Another action</a></li>
-          <li><a href="#">Something else here</a></li>
-          <li role="separator" class="divider"></li>
-          <li><a href="#">Separated link</a></li>
-        </ul>
-      </div>
-
-      <div class="page-header">
-        <h1>Alerts</h1>
-      </div>
-      <div class="alert alert-success" role="alert">
-        <strong>Well done!</strong> You successfully read this important alert message.
-      </div>
-      <div class="alert alert-info" role="alert">
-        <strong>Heads up!</strong> This alert needs your attention, but it's not super important.
-      </div>
-      <div class="alert alert-warning" role="alert">
-        <strong>Warning!</strong> Best check yo self, you're not looking too good.
-      </div>
-      <div class="alert alert-danger" role="alert">
-        <strong>Oh snap!</strong> Change a few things up and try submitting again.
-      </div>
-
-
-      <div class="page-header">
-        <h1>Panels</h1>
-      </div>
-      <div class="row">
-        <div class="col-sm-4">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h3 class="panel-title">Panel title</h3>
-            </div>
-            <div class="panel-body">
-              Panel content
-            </div>
-          </div>
-          <div class="panel panel-primary">
-            <div class="panel-heading">
-              <h3 class="panel-title">Panel title</h3>
-            </div>
-            <div class="panel-body">
-              Panel content
-            </div>
-          </div>
-        </div><!-- /.col-sm-4 -->
-        <div class="col-sm-4">
-          <div class="panel panel-success">
-            <div class="panel-heading">
-              <h3 class="panel-title">Panel title</h3>
-            </div>
-            <div class="panel-body">
-              Panel content
-            </div>
-          </div>
-          <div class="panel panel-info">
-            <div class="panel-heading">
-              <h3 class="panel-title">Panel title</h3>
-            </div>
-            <div class="panel-body">
-              Panel content
-            </div>
-          </div>
-        </div><!-- /.col-sm-4 -->
-        <div class="col-sm-4">
-          <div class="panel panel-warning">
-            <div class="panel-heading">
-              <h3 class="panel-title">Panel title</h3>
-            </div>
-            <div class="panel-body">
-              Panel content
-            </div>
-          </div>
-          <div class="panel panel-danger">
-            <div class="panel-heading">
-              <h3 class="panel-title">Panel title</h3>
-            </div>
-            <div class="panel-body">
-              Panel content
-            </div>
-          </div>
-        </div><!-- /.col-sm-4 -->
-      </div>
+      <div class="page-header"></div>
 
     </div> <!-- /container -->
 
@@ -313,8 +229,8 @@
                Givat Ram Campus, Jerusalem, 91904, Israel<br>
                Tel: (+972) 2-658-5703<br>
                <br><u>Email us at:</u><br>
-               Oded: oded.rimon AT mail.huji.ac.il<br>
-               Dana: danare AT mail.huji.ac.il
+               Oded: <span id="email_oded"></span><br>
+               Dana: <span id="email_dana"></span>
             </p>
         </div>
     </div>
@@ -334,38 +250,17 @@
     <!-- Local Code -->
     <script language="javascript" src="bootstrap/js/fitter.js"></script>
     <script language="javascript"><!--
-        function input_cleanup() {
-            $('#input_path').css('background-color','#FFFFFF');
-            $('#input_message_user').text("");
-        }
-        function fig_cleanup() {
-            $('#fig1').html('');
-            $('#fig2').html('');
-            $('#fig3').html('');
-            $('#fig4').html('');
-            $('.smallcirc').hide();
-            $('#top_dragline').attr('d','');
-            $('#bottom_dragline').attr('d','');
-            $('#approx_start').hide();
-            $('#fit_data').hide();
-            $('#gross_filter').hide();
-            set_progress($('#total_progress'), 0, '');
-        }
-        function get_clean_coords(which) {
-            x1 = parseInt($('#' + which + '_dragline1').css('left').slice(0,-2)) + 5;
-            y1 = parseInt($('#' + which + '_dragline1').css('top').slice(0,-2)) + 5;
-            x2 = parseInt($('#' + which + '_dragline2').css('left').slice(0,-2)) + 5;
-            y2 = parseInt($('#' + which + '_dragline2').css('top').slice(0,-2)) + 5;
-            x3 = parseInt($('#' + which + '_dragline3').css('left').slice(0,-2)) + 5;
-            y3 = parseInt($('#' + which + '_dragline3').css('top').slice(0,-2)) + 5;
-            return {x1:x1, y1:y1, x2:x2, y2:y2, x3:x3, y3:y3};
-        }
-        function set_progress(bar, value, text) {
-            bar.css('width', value+'%');
-            bar.attr('aria-valuenow', value);
-            bar.html(text);
-        }
         $(document).ready(function() {
+            var MAX_UPLOAD_SIZE = 30*1024*1024;
+            $.ajaxSetup({ cache: false });
+
+            $.get('backend?function=get_email_oded', function(data) {
+                $('#email_oded').html(data.replace('123','@'));
+            })
+            $.get('backend?function=get_email_dana', function(data) {
+                $('#email_dana').html(data.replace('123','@'));
+            })
+
             $('.smallcirc').draggable({
                 containment: "#fig_h_orig",
                 drag: function() {
@@ -386,7 +281,69 @@
                     }
                 }
             });
+            $(':file').change(function(){
+                var file = this.files[0];
+                var size = file.size;
+                var type = file.type;
+                if (size > MAX_UPLOAD_SIZE) {
+                    message_user("<strong>Notice!</strong> You are about to upload a file bigger than what the system can handle!", "warning");
+                    $("#fdata").attr("class", "btn btn-warning");
+                } else if ((type != 'text/plain') && (type != 'application/vnd.ms-excel')) {
+                    if (type == "") {
+                        type = "UNKNOWN FILETYPE";
+                    }
+                    message_user("<strong>Notice!</strong> The file you are about to upload is in a format the system cannot handle ("+type+")", "warning");
+                    $("#fdata").attr("class", "btn btn-warning");
+                } else {
+                    clear_user_message();
+                    $("#fdata").attr("class", "btn btn-primary");
+                }
+            });
+            $('#upload').click(function(){
+                    var formData = new FormData($('form')[0]);
+                    $.ajax({
+                        url: 'upload_text.htm',
+                        type: 'POST',
+                        xhr: function() {  // Custom XMLHttpRequest
+                            var myXhr = $.ajaxSettings.xhr();
+                            if (myXhr.upload) { // Check if upload property exists
+                                myXhr.upload.addEventListener('progress', function(e) {
+                                    if(e.lengthComputable){
+                                        //$('').attr({value:e.loaded,max:e.total});
+                                        set_progress($('#total_progress'), 33.33*e.loaded/e.total, 'Data Loading');
+                                    }
+                                }, false); // For handling the progress of the upload
+                            }
+                            return myXhr;
+                        },
+                        //Ajax events
+                        beforeSend: function() {},
+                        success: function(data) {
+                            if (data != false) {
+                                $("#input_path").val(data);
+                                check_input_file(data, function(is_good, reason) {
+                                    if (is_good) {
+                                        $('#fdata').attr('class', 'btn btn-success');
+                                        run_analysis();
+                                    } else {
+                                        $('#fdata').attr('class', 'btn btn-danger');
+                                        message_user("<strong>Cannot Load File!</strong> " + reason, "danger");
+                                    }
+                                });
+                            }
+                        },
+                        error: function() { console.log("ERROR"); },
+                        // Form data
+                        data: formData,
+                        //Options to tell jQuery not to process data or worry about content-type.
+                        cache: false,
+                        contentType: false,
+                        processData: false
+                    });
+            });
             $('#input_clear').bind('click', function() {
+                $('#fdata').val("");
+                $('#fdata').attr("class", "btn btn-primary");
                 $('#input_path').val("");
                 input_cleanup();
                 fig_cleanup();
@@ -394,6 +351,7 @@
             $('#input_path').on('change keypress keyup paste', function() {
                 input_cleanup();
             });
+            /*
             $('#input_check').bind('click', function() {
                 check_input_file($('#input_path').val(), function(is_good, reason) {
                     if (is_good) {
@@ -401,36 +359,18 @@
                         $('#input_path').css('background-color','#EEFAF5');
                     } else {
                         $('#input_path').css('background-color','#FAE5EE');
-                        $('#input_message_user').text(reason);
+                        message_user("<strong>Cannot Load File!</strong> " + reason, "danger");
                     }
                 });
             });
             $('#input_run').bind('click', function() {
-                if ($('#input_path').css('background-color') == "rgb(238, 250, 245)") {
-                    // cleanup everything
-                    fig_cleanup();
-                    // load figure
-                    $('#fig1').html('<img src="backend?function=plot_data&fnames=' + $('#input_path').val() + '">');
-                    // create draglines
-                    $('#top_dragline1').css({"left":"0px", "top":"0px"}).show();
-                    $('#top_dragline2').css({"left":"450px", "top":"0px"}).show();
-                    $('#top_dragline3').css({"left":"900px", "top":"0px"}).show();
-                    coords = get_clean_coords('top');
-                    $('#top_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
-                    $('#bottom_dragline1').css({"left":"0px", "top":"595px"}).show();
-                    $('#bottom_dragline2').css({"left":"450px", "top":"595px"}).show();
-                    $('#bottom_dragline3').css({"left":"900px", "top":"595px"}).show();
-                    coords = get_clean_coords('bottom');
-                    $('#bottom_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
-                    // move to original curve view
-                    $('#fig_b_orig').click();
-                    $('#gross_filter').show();
-                    // progress
-                    set_progress($('#total_progress'), 33.33, 'Data Loaded');
+                if (is_ok_to_run()) {
+                    run_analysis();
                 }
             });
+            */
             $('#gross_filter').bind('click', function() {
-                if ($('#input_path').css('background-color') == "rgb(238, 250, 245)") {
+                if (is_ok_to_run()) {
                     coords = get_clean_coords('top');
                     var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
                     coords = get_clean_coords('bottom');
@@ -489,6 +429,13 @@
                     $('#t1').html(d[3]);
                     $('#t2').html(d[4]);
                 });
+            });
+            $('#get_clean_data').bind('click', function() {
+                coords = get_clean_coords('top');
+                var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
+                coords = get_clean_coords('bottom');
+                var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
+                window.location = 'backend?function=get_clean_data&fnames=' + $('#input_path').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '&output_fnames=' + $('#fdata').get(0).files[0].name + '_clean.csv';
             });
         });
     //  --></script>
