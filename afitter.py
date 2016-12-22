@@ -35,6 +35,50 @@ def check_threshold(point, threshold_points):
             return point[1] <= y1 + (y2 - y1) * rel
     raise RuntimeError("How did we get here?!")
 
+def get_point_max_concentration(data, min_window=3):
+    """
+    @param data: Filtered aggregation data
+    @type data: List of 2-tuples
+    @param min_window: Minimum number of points on which we can calculate concentrations [default: 3]
+    @type min_window: int
+
+    @return: The maximum concentration of points found (at points/sec), and where they were found - (start, end, concentration)
+    @rtype: tuple (int, int, float)
+    """
+    # check params
+    if len(data) <= min_window:
+        return (0, len(data), 0., 0.)
+    # init
+    top = (0, 0, 0., 0.)
+    start = 0
+    end = min_window
+    cur_con = float(end) / (data[end-1][0] - data[start][0])
+    cur_score = float(end)**0.5 * cur_con
+    while end < len(data):
+        # calculate scores for adding one point
+        advcon = float(end-start+1) / (data[end][0] - data[start][0])
+        # adjust score to number of points
+        adv = float(end-start+1)**0.5 * advcon
+        # should we advance the end index?
+        if adv >= cur_score:
+            # yes!
+            cur_score = adv
+            cur_con = advcon
+            end += 1
+        else:
+            # no - but have we reached a top scoring set?
+            if cur_score > top[3]:
+                # new record!
+                top = (start, end, cur_con, cur_score)
+            end += 1
+            start = end - min_window
+    # have we reached a top scoring set at the end?
+    if cur_score > top[3]:
+        # new record!
+        return (start, end, cur_con)
+    else:
+        return top[:3]
+
 
 ################
 # FILE PARSERS #
@@ -48,8 +92,8 @@ def parse_fluorometer_csv(path, threshold_points=None, rev_threshold_points=None
     @type path: str
     @param threshold_points: Points on the graph defining lower thresholds for noise (optional, default: none)
     @type threshold_points: list of 2-tuples
-    @param threshold_points: Points on the graph defining upper thresholds for noise (optional, default: none)
-    @type threshold_points: list of 2-tuples
+    @param rev_threshold_points: Points on the graph defining upper thresholds for noise (optional, default: none)
+    @type rev_threshold_points: list of 2-tuples
 
     @return: Aggregation Data
     @rtype: List of 2-tuples
