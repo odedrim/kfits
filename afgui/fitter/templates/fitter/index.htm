@@ -351,24 +351,6 @@
             $('#input_path').on('change keypress keyup paste', function() {
                 input_cleanup();
             });
-            /*
-            $('#input_check').bind('click', function() {
-                check_input_file($('#input_path').val(), function(is_good, reason) {
-                    if (is_good) {
-                        $('#input_path').css('background-color','#FFFFFF');
-                        $('#input_path').css('background-color','#EEFAF5');
-                    } else {
-                        $('#input_path').css('background-color','#FAE5EE');
-                        message_user("<strong>Cannot Load File!</strong> " + reason, "danger");
-                    }
-                });
-            });
-            $('#input_run').bind('click', function() {
-                if (is_ok_to_run()) {
-                    run_analysis();
-                }
-            });
-            */
             $('#gross_filter').bind('click', function() {
                 if (is_ok_to_run()) {
                     coords = get_clean_coords('top');
@@ -425,10 +407,11 @@
                 $.getJSON('backend?function=clean_data_optimise_noise_threshold&fnames=' + $('#input_path').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2), function(data) {
                     d = data[0];
                     $('#fig4').html(d[0]);
-                    $('#vmax').html(d[1]);
-                    $('#thalf').html(d[2]);
-                    $('#t1').html(d[3]);
-                    $('#t2').html(d[4]);
+                    $('#threshold').val(d[1]);
+                    $('#vmax').html(d[2]);
+                    $('#thalf').html(d[3]);
+                    $('#t1').html(d[4]);
+                    $('#t2').html(d[5]);
                 });
             });
             $('#get_clean_data').bind('click', function() {

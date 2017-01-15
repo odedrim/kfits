@@ -60,7 +60,7 @@ def _fit_data(fnames, threshold_points=None, rev_threshold_points=None, approx_s
     approx_start = float(approx_start[0]) if approx_start else 0
     # run
     data = tfitter.parse_fluorometer_csv(fname, threshold_points, rev_threshold_points)
-    sim_data = tfitter.fit_data(data, approx_start=approx_start)
+    sim_data = tfitter.fit_data(data, approx_start=approx_start, fit_pair=(tfitter.CambridgeFit(75e-6).fit_cambridge, tfitter.FIT_CAMBRIDGE_INIT))
     return data, sim_data
 
 def fit_data(fnames, threshold_points=None, rev_threshold_points=None, approx_start=None):
@@ -131,9 +131,10 @@ def clean_data_optimise_noise_threshold(fnames, threshold_points=None, rev_thres
             # this has gone far enough...
             break
     # final run!
-    adata, new_data, baseline = _clean_data(fnames, [int(noise_threshold+0.5)], threshold_points, rev_threshold_points, approx_start)
+    noise_threshold = int(noise_threshold+0.5)
+    adata, new_data, baseline = _clean_data(fnames, [noise_threshold], threshold_points, rev_threshold_points, approx_start)
     # return clean figure and fitting parameters
-    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, 2, 3, 4], RETM
+    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, 2, 3, 4, 5], RETM
 
 def get_clean_data(fnames, noise_threshold, output_fnames, threshold_points=None, rev_threshold_points=None, approx_start=None):
     # prepare return type

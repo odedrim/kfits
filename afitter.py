@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 import scipy
 from scipy.optimize import curve_fit
 # for debugging
@@ -289,7 +290,7 @@ def find_apparent_maximum(data, range_to_fit=120, minimal_t2=350., debug=False):
         _debug(dict(point_of_divergence=point_of_divergence, retval=data[point_of_divergence]))
     return data[point_of_divergence]
 
-def fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, debug=False):
+def fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, fit_func, init_values, debug=False):
     """
     Fit the main aggregation period data with (t*vmax)/(t+t1/2)) kinetics.
 
@@ -303,6 +304,10 @@ def fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, debug=False):
     @type t2: number
     @param apparent_max: The apparent maximum value
     @type apparent_max: float
+    @param fit_func: The fitting function; receives t (time, shifted to start from 0) and any parameters that should be optimised
+    @type fit_func: function
+    @param init_values: Initial values for all parameters of fit_func except t
+    @type init_values: tuple of numbers
     @param debug: Show debug information? (default: no)
     @type debug: bool
 
@@ -310,33 +315,62 @@ def fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, debug=False):
     @rtype: tuple (tuple (float, float), tuple (float, float))
     """
     to_fit = data[closest_t(data,t1):closest_t(data,t2)+1]
-    popt, pcov = curve_fit(lambda t, vmax, thalf: (t*vmax)/(t+thalf), [x[0]-t1 for x in to_fit], [x[1]-baseline for x in to_fit], p0=(apparent_max-baseline,12))
+    popt, pcov = curve_fit(fit_func, [x[0]-t1 for x in to_fit], [x[1]-baseline for x in to_fit], p0=init_values, maxfev=2500)
+    if debug:
+        _debug(dict(popt=popt, pcov=pcov))
     perr = scipy.sqrt(scipy.diag(pcov))
     ##return [x[0]-t1 for x in to_fit], [x[1]-baseline for x in to_fit]
-    return (popt[0], perr[0]), (popt[1], perr[1])
+    return popt, perr
+
+
+#####################
+# FITTING FUNCTIONS #
+#####################
+
+FIT_BASIC_INIT = lambda apparent_max, baseline: (apparent_max-baseline, 12)
+def fit_basic(t, vmax, thalf):
+    return (t * vmax) / (t + thalf)
+
+FIT_CAMBRIDGE_INIT = lambda apparent_max, baseline: (apparent_max-baseline, 3, 10000)
+class CambridgeFit(object):
+    def __init__(self, m_total):
+        self.mtot = m_total
+
+    def fit_cambridge(self, t, vmax, nc, k):
+        if nc < 0 or nc > 10 or k < 0 or k > 1e12:
+            return 0
+        ins = (nc * k * self.mtot**nc)**0.5
+        try:
+            outs = scipy.vectorize(math.cosh)(ins * t)
+        except OverflowError, e:
+            return 0
+        return vmax * (1 - outs ** (-2./nc))
 
 
 #############
 # INTERFACE #
 #############
 
-def fit_data(data, approx_start=120, debug=False):
+def fit_data(data, approx_start=120, fit_pair=(fit_basic, FIT_BASIC_INIT), debug=False):
+    # find initiation
     baseline, t1 = find_aggregation_initiation(data, approx=approx_start, debug=debug)
+    # find plateau
     t2, apparent_max = find_apparent_maximum(data, debug=debug)
-    vmax_, thalf_ = fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, debug=debug)
-    vmax = vmax_[0]
-    thalf = thalf_[0]
+    # fit kinetics
+    popt, perr = fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, fit_pair[0], fit_pair[1](apparent_max, baseline), debug=debug)
     if debug:
-        _debug(dict(vmax='%.2f +- %.2f' % vmax_, thalf='%.3f +- %.3f' % thalf_))
+        import inspect
+        d = dict(zip(inspect.getargspec(fit_pair[0])[0][2:], ['%.3f +- %.3f' % (popt[i], perr[i]) for i in xrange(len(popt))]))
+        _debug(d)
     # fit rest of data with straight line
-    end_of_agg_curve = baseline+((t2-t1)*vmax)/((t2-t1)+thalf)
+    end_of_agg_curve = baseline + fit_pair[0](t2-t1, *popt)
     to_fit = data[closest_t(data,t2):]
     a, pcov = curve_fit(lambda x, a: a*x, [x[0]-t2 for x in to_fit], [x[1]-end_of_agg_curve for x in to_fit])
     a = float(a)
 
     # return fitted (simulated) data
     simulated_data = [baseline for x in xrange(int(t1*2))] + \
-                     [baseline+(x/2.*vmax)/(x/2.+thalf) for x in xrange(int((t2-t1)*2))] + \
+                     [baseline + fit_pair[0](x/2., *popt) for x in xrange(int((t2-t1)*2))] + \
                      [(a*((x/2.)-t2)+end_of_agg_curve) for x in range(int(t2*2.)-1, int(2*max(data)[0]))]
     return simulated_data
 
@@ -347,7 +381,7 @@ def main(args):
         return 1
     from matplotlib import pyplot
     data = parse_fluorometer_csv(args[0], debug=True)
-    sim_data = fit_data(data, debug=True)
+    sim_data = fit_data(data, fit_pair=(CambridgeFit(75e-6).fit_cambridge, FIT_CAMBRIDGE_INIT), debug=True)
     pyplot.plot([x[0] for x in data], [x[1] for x in data])
     pyplot.plot([0.5*i for i in xrange(len(sim_data))], sim_data)
     pyplot.show()
