@@ -82,7 +82,7 @@
 
       <!-- Main jumbotron for a primary marketing message or call to action -->
       <div class="jumbotron">
-        <h1>Fit Aggregation Data</h1>
+        <h1>Kfits: Fit Aggregation Data</h1>
         <p>Fit aggregation kinetics to measured data, e.g. light scattering at 360nm or ThT dye fluorescence shift.<br>
         See instructions for file format requirements etc.</p>
       </div>
@@ -103,6 +103,11 @@
       <br></p><p>
         <span id="input_message_user" class="hidden" role="alert"></span>
       </p>
+      Model: <select id="model_choice">
+          <option value="auto" selected="selected">Automatic Best Model</option>
+          <option value="basic">Basic One-site Binding</option>
+          <option value="nucleation_elongation">Nucleation-Elongation Model</option>
+      </select>
 
       <div class="page-header">
         <h1>Progress</h1>
@@ -377,7 +382,7 @@
                 var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
                 coords = get_clean_coords('bottom');
                 var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-                $('#fig3').html('<img src="backend?function=fit_data&fnames=' + $('#input_path').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '">');
+                $('#fig3').html('<img src="backend?function=fit_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '">');
                 $('#fig_b_fit').click();
                 set_progress($('#total_progress'), 100, 'Fitting Done!');
             });
@@ -403,8 +408,8 @@
                 var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
                 coords = get_clean_coords('bottom');
                 var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-                // $.getJSON('backend?function=clean_data&fnames=' + $('#input_path').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2), function(data) {
-                $.getJSON('backend?function=clean_data_optimise_noise_threshold&fnames=' + $('#input_path').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2), function(data) {
+                // $.getJSON('backend?function=clean_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2), function(data) {
+                $.getJSON('backend?function=clean_data_optimise_noise_threshold&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2), function(data) {
                     d = data[0];
                     $('#fig4').html(d[0]);
                     $('#threshold').val(d[1]);
@@ -419,7 +424,7 @@
                 var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
                 coords = get_clean_coords('bottom');
                 var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-                window.location = 'backend?function=get_clean_data&fnames=' + $('#input_path').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '&output_fnames=' + $('#fdata').get(0).files[0].name + '_clean.csv';
+                window.location = 'backend?function=get_clean_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '&output_fnames=' + $('#fdata').get(0).files[0].name + '_clean.csv';
             });
         });
     //  --></script>

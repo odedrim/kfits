@@ -311,8 +311,8 @@ def fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, fit_func, ini
     @param debug: Show debug information? (default: no)
     @type debug: bool
 
-    @return: (vmax, vmax stderr), (t1/2, t1/2 stderr)
-    @rtype: tuple (tuple (float, float), tuple (float, float))
+    @return: popt and perr
+    @rtype: tuple, tuple
     """
     to_fit = data[closest_t(data,t1):closest_t(data,t2)+1]
     popt, pcov = curve_fit(fit_func, [x[0]-t1 for x in to_fit], [x[1]-baseline for x in to_fit], p0=init_values, maxfev=2500)
@@ -321,6 +321,51 @@ def fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, fit_func, ini
     perr = scipy.sqrt(scipy.diag(pcov))
     ##return [x[0]-t1 for x in to_fit], [x[1]-baseline for x in to_fit]
     return popt, perr
+
+def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=False):
+    """
+    Fit the main aggregation period data with (t*vmax)/(t+t1/2)) kinetics.
+
+    @param data: The aggregation data
+    @type data: List of 2-tuples
+    @param baseline: The calculated baseline of the curve
+    @type baseline: float
+    @param t1: Time of the beginning of the aggregation kinetics
+    @type t1: number
+    @param t2: Time of the end of the aggregation kinetics
+    @type t2: number
+    @param apparent_max: The apparent maximum value
+    @type apparent_max: float
+    @param fit_pairs: Dictionary of names pointing to 2-tuples, each comprised of a fitting function and initial values
+    @type fit_pairs: dict (str:tuple)
+    @param debug: Show debug information? (default: no)
+    @type debug: bool
+
+    @return: The best fit_pair's name
+    @rtype: str
+    """
+    to_fit = data[closest_t(data,t1):closest_t(data,t2)+1]
+    x_vals = [x[0]-t1 for x in to_fit]
+    y_vals = [x[1]-baseline for x in to_fit]
+    # fitting loop
+    best = None
+    best_score = None
+    for name, (fit_func, init_values) in fit_pairs.iteritems():
+        init_values = init_values(apparent_max, baseline)
+        popt, pcov = curve_fit(fit_func, x_vals, y_vals, p0=init_values, maxfev=2500)
+        try:
+            score = sum([abs(y_vals[i] - (baseline + fit_func(x_vals[i], *popt))) for i in xrange(len(y_vals))])
+        except Exception, e:
+            print
+            print len(y_vals), len(range(int((t2-t1)*2)))
+            print
+            raise e
+        if debug:
+            _debug(dict(model_name=name, score=score))
+        if best is None or score < best_score:
+            best = name
+            best_score = score
+    return best
 
 
 #####################
@@ -347,15 +392,23 @@ class CambridgeFit(object):
         return vmax * (1 - outs ** (-2./nc))
 
 
+FITTING_PAIRS = dict(basic = (fit_basic, FIT_BASIC_INIT),
+                     nucleation_elongation = (CambridgeFit(75e-6).fit_cambridge, FIT_CAMBRIDGE_INIT))
+
+
 #############
 # INTERFACE #
 #############
 
-def fit_data(data, approx_start=120, fit_pair=(fit_basic, FIT_BASIC_INIT), debug=False):
+def fit_data(data, model='auto', approx_start=120, debug=False):
     # find initiation
     baseline, t1 = find_aggregation_initiation(data, approx=approx_start, debug=debug)
     # find plateau
     t2, apparent_max = find_apparent_maximum(data, debug=debug)
+    # choose model
+    if model == 'auto':
+        model = choose_best_model(data, baseline, t1, t2, apparent_max, FITTING_PAIRS, debug=True)
+    fit_pair = FITTING_PAIRS[model]
     # fit kinetics
     popt, perr = fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, fit_pair[0], fit_pair[1](apparent_max, baseline), debug=debug)
     if debug:
@@ -375,13 +428,17 @@ def fit_data(data, approx_start=120, fit_pair=(fit_basic, FIT_BASIC_INIT), debug
     return simulated_data
 
 
+##########################
+# COMMAND-LINE INTERFACE #
+##########################
+
 def main(args):
     if len(args) != 1:
         print >> sys.stderr, "Usage: %s <csv file path>" % sys.argv[0]
         return 1
     from matplotlib import pyplot
     data = parse_fluorometer_csv(args[0], debug=True)
-    sim_data = fit_data(data, fit_pair=(CambridgeFit(75e-6).fit_cambridge, FIT_CAMBRIDGE_INIT), debug=True)
+    sim_data = fit_data(data, debug=True)
     pyplot.plot([x[0] for x in data], [x[1] for x in data])
     pyplot.plot([0.5*i for i in xrange(len(sim_data))], sim_data)
     pyplot.show()
