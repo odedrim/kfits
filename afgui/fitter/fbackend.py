@@ -95,7 +95,7 @@ def clean_data(fnames, model, noise_threshold, threshold_points=None, rev_thresh
     # run clean
     adata, new_data, baseline = _clean_data(fnames, model, noise_threshold, threshold_points, rev_threshold_points, approx_start)
     # return clean figure and fitting parameters
-    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), 1, 2, 3, 4], RETM
+    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, 1, 2, 3, 4], RETM
 
 def clean_data_optimise_noise_threshold(fnames, model, threshold_points=None, rev_threshold_points=None, approx_start=None):
     # prepare return type

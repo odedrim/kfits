@@ -89,7 +89,7 @@
 
 
       <div class="page-header">
-        <h1>Load Data</h1>
+        <h1>Input and Parameters</h1>
       </div>
         <form enctype="multipart/form-data">
             {% csrf_token %}
@@ -162,6 +162,22 @@
       </div>
       <div id="fig_h_fit" class="fig_head">
           <span id="fig3"></span>
+          <svg id="arrow_to_results" style="position: absolute; left: 400px; top: 300px; display: none;">
+              <defs id="defs4">
+                <marker style="overflow:visible;" id="Arrow2SendF" refX="0.0" refY="0.0" orient="auto" inkscape:stockid="Arrow2SendF">
+                    <path transform="scale(0.3) rotate(180) translate(-2.3,0)" d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z " style="stroke-linejoin:round;stroke:#800080;stroke-width:0.62500000;fill:#800080;fill-rule:evenodd" id="path4582"></path>
+                </marker>
+              </defs>
+              <g id="layer1" inkscape:groupmode="layer" inkscape:label="Layer 1">
+                  <path inkscape:connector-curvature="0" id="path2985" d="m 130,49.505039 0,67.857141" style="stroke-linejoin:miter;marker-end:url(#Arrow2SendF);stroke-opacity:1;stroke:#800080;stroke-linecap:butt;stroke-miterlimit:4;stroke-dasharray:none;stroke-width:15;fill:#800080" />
+                  <text xml:space="preserve" style="font-size:32px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#800080;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Sans Bold" id="text2991" sodipodi:linespacing="125%">
+                      <tspan sodipodi:role="line" x="215" y="17.505039" id="tspan2995" style="font-size:20px">Cleaning Results</tspan>
+                  </text>
+                  <text xml:space="preserve" style="font-size:32px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#800080;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Sans Bold" id="text2992" sodipodi:linespacing="125%">
+                      <tspan sodipodi:role="line" x="215" y="40.505039" id="tspan2999" style="font-size:20px">Below</tspan>
+                  </text>
+              </g>
+          </svg>
       </div>
 
       <div class="page-header">
@@ -170,8 +186,8 @@
 
       <div id="results" class="row">
         <div class="col-md-6">
-            Noise Threshold:&nbsp;&nbsp;&nbsp;&nbsp;<input id="threshold" style="width:50px;" value="15" />
-            <button id="clean_data" type="button" class="btn btn-info" style="width:100%;">Clean Data</button>
+            Noise Threshold:&nbsp;&nbsp;&nbsp;&nbsp;<input id="threshold" style="width:50px;" value="15" />&nbsp;&nbsp;
+            <button id="clean_data" type="button" class="btn btn-info" style="width:40%;">Apply Threshold</button>
             <div id="fig4" style="margin-top:10px;"></div>
             <button id="get_clean_data" type="button" class="btn btn-success" style="width:100%;">Download Clean Data</button>
         </div>
@@ -378,13 +394,18 @@
                 $(head_id).show();
             });
             $('#fit_data').bind('click', function() {
-                coords = get_clean_coords('top');
-                var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-                coords = get_clean_coords('bottom');
-                var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-                $('#fig3').html('<img src="backend?function=fit_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '">');
-                $('#fig_b_fit').click();
-                set_progress($('#total_progress'), 100, 'Fitting Done!');
+                // clean data with automatic noise threshold optimisation
+                clean_data(function(text_top_coords, text_bottom_coords) { 
+                    $('#fig3').html('<img src="backend?function=fit_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '">');
+                    $('#fig_b_fit').click();
+                    $('#arrow_to_results').show(function() {
+                        for(i=0;i<3;i++) {
+                            $('#arrow_to_results').fadeTo(1000, 0).fadeTo(1000, 1.0);
+                        }
+                        $('#arrow_to_results').hide();
+                    });
+                    set_progress($('#total_progress'), 100, 'Fitting Done!');
+                });
             });
             $('.topnav_btn').bind('click', function() {
                 $('.topnav_btn').removeClass('active');
@@ -403,13 +424,17 @@
                     $('#contact').show();
                 }
             });
-            $('#clean_data').bind('click', function() {
+            function clean_data(callback, threshold) {
                 coords = get_clean_coords('top');
                 var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
                 coords = get_clean_coords('bottom');
                 var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-                // $.getJSON('backend?function=clean_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2), function(data) {
-                $.getJSON('backend?function=clean_data_optimise_noise_threshold&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2), function(data) {
+                if (typeof threshold == 'undefined') {
+                    var func = 'clean_data_optimise_noise_threshold';
+                } else {
+                    var func = 'clean_data&noise_threshold=' + threshold;
+                }
+                $.getJSON('backend?function=' + func + '&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2), function(data) {
                     d = data[0];
                     $('#fig4').html(d[0]);
                     $('#threshold').val(d[1]);
@@ -417,7 +442,11 @@
                     $('#thalf').html(d[3]);
                     $('#t1').html(d[4]);
                     $('#t2').html(d[5]);
+                    callback(text_top_coords, text_bottom_coords);
                 });
+            }
+            $('#clean_data').bind('click', function() {
+                clean_data(function(){}, $('#threshold').val());
             });
             $('#get_clean_data').bind('click', function() {
                 coords = get_clean_coords('top');
