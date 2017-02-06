@@ -44,6 +44,31 @@ input {
     width: 900px;
 }
 
+.sidenav {
+    height: 100%; /* 100% Full-height */
+    width: 100px;
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0;
+    left: 0;
+    background: #111; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(#222, #3c3c3c); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(#222, #3c3c3c); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(#222, #3c3c3c); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(#222, #3c3c3c); /* Standard syntax */
+    overflow-x: hidden; /* Disable horizontal scroll */
+    padding-top: 50px; /* Place content 50px from the top, under topnav */
+}
+
+.rotated90 {
+    position: relative;
+    -webkit-transform: rotate(-90deg);  /* Chrome, Safari 3.1+ */
+    -moz-transform: rotate(-90deg);  /* Firefox 3.5-15 */
+    -ms-transform: rotate(-90deg);  /* IE 9 */
+    -o-transform: rotate(-90deg);  /* Opera 10.50-12.00 */
+    transform: rotate(-90deg);  /* Firefox 16+, IE 10+, Opera 12.10+ */
+}
+
 .message {
     margin: 100px;
     display: none;
