@@ -190,7 +190,7 @@
       <div id="results" class="row">
         <div class="col-md-6">
             Noise Threshold:&nbsp;&nbsp;&nbsp;&nbsp;<input id="threshold" style="width:50px;" value="15" />&nbsp;&nbsp;
-            <button id="clean_data" type="button" class="btn btn-info" style="width:40%;">Apply Threshold</button>
+            <button id="clean_data" type="button" class="btn btn-info" style="width:40%;" disabled=true>Apply Threshold</button>
             <div id="fig4" style="margin-top:10px;"></div>
             <button id="get_clean_data" type="button" class="btn btn-success" style="width:100%;">Download Clean Data</button>
         </div>
@@ -203,6 +203,10 @@
               </tr>
             </thead>
             <tbody id="kinetic_variables">
+              <tr>
+                  <td>Model Used</td>
+                  <td id="model_name"></td>
+              </tr>
               <tr>
                   <td>t<sub>1</sub> (kinetics start)</td>
                   <td id="t1"></td>

@@ -350,7 +350,7 @@ def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=Fal
     # fitting loop
     best = None
     best_score = None
-    for name, (fit_func, init_values) in fit_pairs.iteritems():
+    for name, (fit_func, init_values, param_names) in fit_pairs.iteritems():
         init_values = init_values(apparent_max, baseline)
         popt, pcov = curve_fit(fit_func, x_vals, y_vals, p0=init_values, maxfev=2500)
         try:
@@ -373,10 +373,12 @@ def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=Fal
 #####################
 
 FIT_BASIC_INIT = lambda apparent_max, baseline: (apparent_max-baseline, 12)
+FIT_BASIC_PARAM_NAMES = ('v<sub>max</sub>', 't<sub>&#189;</sub>')
 def fit_basic(t, vmax, thalf):
     return (t * vmax) / (t + thalf)
 
 FIT_CAMBRIDGE_INIT = lambda apparent_max, baseline: (apparent_max-baseline, 3, 10000)
+FIT_CAMBRIDGE_PARAM_NAMES = ('v<sub>max</sub>', 'n<sub>c</sub>', 'k')
 class CambridgeFit(object):
     def __init__(self, m_total):
         self.mtot = m_total
@@ -392,8 +394,13 @@ class CambridgeFit(object):
         return vmax * (1 - outs ** (-2./nc))
 
 
-FITTING_PAIRS = dict(basic = (fit_basic, FIT_BASIC_INIT),
-                     nucleation_elongation = (CambridgeFit(75e-6).fit_cambridge, FIT_CAMBRIDGE_INIT))
+FITTING_PAIRS = dict(basic = (fit_basic, \
+                              FIT_BASIC_INIT, \
+                              FIT_BASIC_PARAM_NAMES),
+                     nucleation_elongation = (CambridgeFit(75e-6).fit_cambridge, \
+                                              FIT_CAMBRIDGE_INIT, \
+                                              FIT_CAMBRIDGE_PARAM_NAMES)
+                     )
 
 
 #############
@@ -412,7 +419,6 @@ def fit_data(data, model='auto', approx_start=120, debug=False):
     # fit kinetics
     popt, perr = fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, fit_pair[0], fit_pair[1](apparent_max, baseline), debug=debug)
     if debug:
-        import inspect
         d = dict(zip(inspect.getargspec(fit_pair[0])[0][2:], ['%.3f +- %.3f' % (popt[i], perr[i]) for i in xrange(len(popt))]))
         _debug(d)
     # fit rest of data with straight line
@@ -425,7 +431,11 @@ def fit_data(data, model='auto', approx_start=120, debug=False):
     simulated_data = [baseline for x in xrange(int(t1*2))] + \
                      [baseline + fit_pair[0](x/2., *popt) for x in xrange(int((t2-t1)*2))] + \
                      [(a*((x/2.)-t2)+end_of_agg_curve) for x in range(int(t2*2.)-1, int(2*max(data)[0]))]
-    return simulated_data
+    # prepare return value
+    params = dict(model = model, t1 = t1, t2 = t2)
+    for i, param_name in enumerate(fit_pair[2]):
+        params[param_name] = '%.3f &plusmn; %.3f' % (popt[i], perr[i])
+    return simulated_data, params
 
 
 ##########################
@@ -438,7 +448,9 @@ def main(args):
         return 1
     from matplotlib import pyplot
     data = parse_fluorometer_csv(args[0], debug=True)
-    sim_data = fit_data(data, debug=True)
+    sim_data, params = fit_data(data, debug=True)
+    for item in params.iteritems():
+        print '%s: %s' % item
     pyplot.plot([x[0] for x in data], [x[1] for x in data])
     pyplot.plot([0.5*i for i in xrange(len(sim_data))], sim_data)
     pyplot.show()

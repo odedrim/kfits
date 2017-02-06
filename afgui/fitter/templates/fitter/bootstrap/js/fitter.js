@@ -14,6 +14,10 @@ function fig_cleanup() {
     $('#approx_start').hide();
     $('#fit_data').hide();
     $('#gross_filter').hide();
+    $('.auto_kinetics').remove();
+    $('#model_name').html('');
+    $('#t1').html('');
+    $('#t2').html('');
     set_progress($('#total_progress'), 0, '');
 }
 
@@ -79,3 +83,37 @@ function run_analysis() {
     // progress
     set_progress($('#total_progress'), 33.33, 'Data Loaded');
 }
+
+function clean_data(callback, threshold) {
+    coords = get_clean_coords('top');
+    var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
+    coords = get_clean_coords('bottom');
+    var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
+    if (typeof threshold == 'undefined') {
+        var func = 'clean_data_optimise_noise_threshold';
+    } else {
+        var func = 'clean_data&noise_threshold=' + threshold;
+    }
+    $.getJSON('backend?function=' + func + '&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2), function(data) {
+        // cleanup
+        $('.auto_kinetics').remove();
+        // parse data
+        d = data[0];
+        $('#fig4').html(d[0]);
+        $('#threshold').val(d[1]);
+        // print kinetic parameters
+        $('#model_name').html(d[2]);
+        $('#t1').html(d[3]);
+        $('#t2').html(d[4]);
+        for(var key in d[5]){
+            if (d[5].hasOwnProperty(key)) {
+                var tr = $('<tr></tr>').addClass('auto_kinetics');
+                tr.append($('<td></td>').html(key));
+                tr.append($('<td></td>').html(d[5][key]));
+                $('#kinetic_variables').append(tr);
+            }
+        }
+        callback(text_top_coords, text_bottom_coords);
+    });
+}
+

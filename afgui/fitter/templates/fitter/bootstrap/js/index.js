@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var MAX_UPLOAD_SIZE = 30*1024*1024;
+    var MAX_UPLOAD_SIZE = 10*1024*1024;
     $.ajaxSetup({ cache: false });
 
     $.get('backend?function=get_email_oded', function(data) {
@@ -25,6 +25,7 @@ $(document).ready(function() {
             $('#bottom_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
         }
     });
+
     $('#approx_start').draggable({
         stop: function() {
             $(this).css('top','0px');
@@ -36,7 +37,8 @@ $(document).ready(function() {
             }
         }
     });
-    $(':file').change(function(){
+
+    $(':file').change(function() {
         var file = this.files[0];
         var size = file.size;
         var type = file.type;
@@ -54,7 +56,8 @@ $(document).ready(function() {
             $("#fdata").attr("class", "btn btn-primary");
         }
     });
-    $('#upload').click(function(){
+
+    $('#upload').click(function() {
             var formData = new FormData($('form')[0]);
             $.ajax({
                 url: 'upload_text.htm',
@@ -96,6 +99,7 @@ $(document).ready(function() {
                 processData: false
             });
     });
+
     $('#input_clear').bind('click', function() {
         $('#fdata').val("");
         $('#fdata').attr("class", "btn btn-primary");
@@ -103,9 +107,11 @@ $(document).ready(function() {
         input_cleanup();
         fig_cleanup();
     });
+
     $('#input_path').on('change keypress keyup paste', function() {
         input_cleanup();
     });
+
     $('#gross_filter').bind('click', function() {
         if (is_ok_to_run()) {
             coords = get_clean_coords('top');
@@ -119,6 +125,7 @@ $(document).ready(function() {
             set_progress($('#total_progress'), 66.67, 'Outliers Filtered');
         }
     });
+
     $('.fig_badge').bind('click', function() {
         var this_id = $(this)[0].id;
         var head_id = '#fig_h_' + this_id.substr(6);
@@ -127,6 +134,7 @@ $(document).ready(function() {
         $(this).addClass('active');
         $(head_id).show();
     });
+
     $('#fit_data').bind('click', function() {
         // clean data with automatic noise threshold optimisation
         clean_data(function(text_top_coords, text_bottom_coords) { 
@@ -136,6 +144,7 @@ $(document).ready(function() {
             set_progress($('#total_progress'), 100, 'Fitting Done!');
         });
     });
+
     $('.topnav_btn').bind('click', function() {
         $('.topnav_btn').removeClass('active');
         $(this).addClass('active');
@@ -153,30 +162,19 @@ $(document).ready(function() {
             $('#contact').show();
         }
     });
-    function clean_data(callback, threshold) {
-        coords = get_clean_coords('top');
-        var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-        coords = get_clean_coords('bottom');
-        var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-        if (typeof threshold == 'undefined') {
-            var func = 'clean_data_optimise_noise_threshold';
-        } else {
-            var func = 'clean_data&noise_threshold=' + threshold;
-        }
-        $.getJSON('backend?function=' + func + '&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2), function(data) {
-            d = data[0];
-            $('#fig4').html(d[0]);
-            $('#threshold').val(d[1]);
-            $('#vmax').html(d[2]);
-            $('#thalf').html(d[3]);
-            $('#t1').html(d[4]);
-            $('#t2').html(d[5]);
-            callback(text_top_coords, text_bottom_coords);
-        });
-    }
-    $('#clean_data').bind('click', function() {
-        clean_data(function(){}, $('#threshold').val());
+
+    $('#threshold').on('input', function() {
+        $('#clean_data').attr('disabled', false);
     });
+
+    $('#clean_data').bind('click', function() {
+        if (!$(this).hasClass('grayed_out_blue')) {
+            clean_data(function() {
+                $('#clean_data').attr('disabled', true);
+            }, $('#threshold').val());
+        }
+    });
+
     $('#get_clean_data').bind('click', function() {
         coords = get_clean_coords('top');
         var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';

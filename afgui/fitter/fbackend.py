@@ -13,7 +13,7 @@ import tfitter
 FIG_W = 900
 FIG_H = 600
 # input file params
-MAX_FILE_SIZE = 3*1024*1024
+MAX_FILE_SIZE = 10*1024*1024
 # noise reduction params
 MAX_THRESHOLD_SEARCH_ITERATIONS = 10
 MAX_NOISE_REMOVAL = 0.4
@@ -60,15 +60,15 @@ def _fit_data(fnames, model, threshold_points=None, rev_threshold_points=None, a
     approx_start = float(approx_start[0]) if approx_start else 0
     # run
     data = tfitter.parse_fluorometer_csv(fname, threshold_points, rev_threshold_points)
-    sim_data = tfitter.fit_data(data, approx_start=approx_start, model=model)
-    return data, sim_data
+    sim_data, params = tfitter.fit_data(data, approx_start=approx_start, model=model)
+    return data, sim_data, params
 
 def fit_data(fnames, model, threshold_points=None, rev_threshold_points=None, approx_start=None):
     # prepare return type
     TO_JSON = False
     RETTYPE = 'image/svg+xml'
     # run
-    data, sim_data = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start)
+    data, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start)
     adata = scipy.array(data).T
     return TO_JSON, tfitter.plot_two_to_svg(adata[0], adata[1], [0.5*i for i in xrange(len(sim_data))], sim_data), RETTYPE
 
@@ -81,28 +81,28 @@ def _clean_data(fnames, model, noise_threshold, threshold_points=None, rev_thres
     # parse parameters
     noise_threshold = int(noise_threshold[0])
     # run fitting
-    data, sim_data = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start)
+    data, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start)
     # find basal level
     baseline = tfitter.find_absolute_baseline(data)
     # clean data
     adata, new_data = _clean_data_short(data, sim_data, noise_threshold)
-    return adata, new_data, baseline
+    return adata, new_data, baseline, params
 
 def clean_data(fnames, model, noise_threshold, threshold_points=None, rev_threshold_points=None, approx_start=None):
     # prepare return type
     TO_JSON = True
     RETM = "OK"
     # run clean
-    adata, new_data, baseline = _clean_data(fnames, model, noise_threshold, threshold_points, rev_threshold_points, approx_start)
+    adata, new_data, baseline, params = _clean_data(fnames, model, noise_threshold, threshold_points, rev_threshold_points, approx_start)
     # return clean figure and fitting parameters
-    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, 1, 2, 3, 4], RETM
+    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, params.pop('model'), params.pop('t1'), params.pop('t2'), params], RETM
 
 def clean_data_optimise_noise_threshold(fnames, model, threshold_points=None, rev_threshold_points=None, approx_start=None):
     # prepare return type
     TO_JSON = True
     RETM = "OK"
     # optimisation loop
-    data, sim_data = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start)
+    data, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start)
     span = max(data, key=lambda (t,v):v)[1] - min(data, key=lambda (t,v):v)[1]
     noise_threshold = span / 3.
     ##last_reduction = 0
@@ -128,16 +128,16 @@ def clean_data_optimise_noise_threshold(fnames, model, threshold_points=None, re
             break
     # final run!
     noise_threshold = int(noise_threshold+0.5)
-    adata, new_data, baseline = _clean_data(fnames, model, [noise_threshold], threshold_points, rev_threshold_points, approx_start)
+    adata, new_data, baseline, params = _clean_data(fnames, model, [noise_threshold], threshold_points, rev_threshold_points, approx_start)
     # return clean figure and fitting parameters
-    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, 2, 3, 4, 5], RETM
+    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, params.pop('model'), params.pop('t1'), params.pop('t2'), params], RETM
 
 def get_clean_data(fnames, model, noise_threshold, output_fnames, threshold_points=None, rev_threshold_points=None, approx_start=None):
     # prepare return type
     TO_JSON = False
     RETTYPE = 'text/plain'
     # run clean
-    adata, new_data, baseline = _clean_data(fnames, model, noise_threshold, threshold_points, rev_threshold_points, approx_start)
+    adata, new_data, baseline, params = _clean_data(fnames, model, noise_threshold, threshold_points, rev_threshold_points, approx_start)
     # prepare file
     new = ['XYDATA,values']
     for x,y in new_data:
