@@ -16,6 +16,8 @@ def main(args):
     sim_data = fitter.fit_data(data)
     # find basal level
     baseline = fitter.find_absolute_baseline(data)
+    # run fitting
+    sim_data, params = fitter.fit_data(data)
     # clean data
     print 'threshold:', threshold
     new_data = filter(lambda (t,v): v-sim_data[int(t*2)] < threshold, data)

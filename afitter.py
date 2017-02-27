@@ -352,14 +352,12 @@ def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=Fal
     best_score = None
     for name, (fit_func, init_values, param_names) in fit_pairs.iteritems():
         init_values = init_values(apparent_max, baseline)
-        popt, pcov = curve_fit(fit_func, x_vals, y_vals, p0=init_values, maxfev=2500)
         try:
-            score = sum([abs(y_vals[i] - (baseline + fit_func(x_vals[i], *popt))) for i in xrange(len(y_vals))])
+            popt, pcov = curve_fit(fit_func, x_vals, y_vals, p0=init_values, maxfev=2500)
         except Exception, e:
-            print
-            print len(y_vals), len(range(int((t2-t1)*2)))
-            print
-            raise e
+            print "Encounter error trying to fit data with %r: %s" % (name, e)
+            continue
+        score = sum([abs(y_vals[i] - (baseline + fit_func(x_vals[i], *popt))) for i in xrange(len(y_vals))])
         if debug:
             _debug(dict(model_name=name, score=score))
         if best is None or score < best_score:
@@ -415,6 +413,8 @@ def fit_data(data, model='auto', approx_start=120, debug=False):
     # choose model
     if model == 'auto':
         model = choose_best_model(data, baseline, t1, t2, apparent_max, FITTING_PAIRS, debug=True)
+        if model is None:
+            raise RuntimeError("None of the models successfully fit the data!")
     fit_pair = FITTING_PAIRS[model]
     # fit kinetics
     popt, perr = fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, fit_pair[0], fit_pair[1](apparent_max, baseline), debug=debug)
