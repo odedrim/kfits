@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import os
 import sys
 import math
@@ -446,7 +447,11 @@ def main(args):
     if len(args) != 1:
         print >> sys.stderr, "Usage: %s <csv file path>" % sys.argv[0]
         return 1
-    from matplotlib import pyplot
+    try:
+        from matplotlib import pyplot
+    except ImportError, e:
+        print >> sys.stderr, "The command line interface requires installation of the python matplotlib package."
+        return 1
     data = parse_fluorometer_csv(args[0], debug=True)
     sim_data, params = fit_data(data, debug=True)
     for item in params.iteritems():

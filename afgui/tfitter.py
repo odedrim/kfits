@@ -1,9 +1,13 @@
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
-print >> sys.stderr, str(sys.path)
-from afitter import *
+import os, sys
+try:
+    from kfits.afitter import *
+except ImportError:
+    # in case the package is not properly installed, try to work locally
+    import inspect
+    currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    parentdir = os.path.dirname(currentdir)
+    sys.path.insert(0,parentdir)
+    from afitter import *
 
 #########
 # UTILS #
