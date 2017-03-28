@@ -6,6 +6,8 @@ import scipy
 from scipy.optimize import curve_fit
 # for debugging
 import inspect
+# this package
+import models
 
 #########
 # UTILS #
@@ -250,7 +252,7 @@ def find_apparent_maximum(data, range_to_fit=120, minimal_t2=350., debug=False):
 
     @param data: The aggregation data
     @type data: List of 2-tuples
-    @param range_to_fit: How many timepoints at the end of the trace to fit with line (default: 120, i.e. 1 min)
+    @param range_to_fit: How many timepoints at the end of the trace to fit with line (default: 120, i.e. 2 min)
     @type range_to_fit: int
     @param minimal_t2: Minimal value for t2, important for low-aggregation samples (default: 350s)
     @type minimal_t2: number
@@ -356,7 +358,7 @@ def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=Fal
         try:
             popt, pcov = curve_fit(fit_func, x_vals, y_vals, p0=init_values, maxfev=2500)
         except Exception, e:
-            print "Encounter error trying to fit data with %r: %s" % (name, e)
+            print "Encountered error trying to fit data with %r: %s" % (name, e)
             continue
         score = sum([abs(y_vals[i] - (baseline + fit_func(x_vals[i], *popt))) for i in xrange(len(y_vals))])
         if debug:
@@ -371,35 +373,7 @@ def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=Fal
 # FITTING FUNCTIONS #
 #####################
 
-FIT_BASIC_INIT = lambda apparent_max, baseline: (apparent_max-baseline, 12)
-FIT_BASIC_PARAM_NAMES = ('v<sub>max</sub>', 't<sub>&#189;</sub>')
-def fit_basic(t, vmax, thalf):
-    return (t * vmax) / (t + thalf)
-
-FIT_CAMBRIDGE_INIT = lambda apparent_max, baseline: (apparent_max-baseline, 3, 10000)
-FIT_CAMBRIDGE_PARAM_NAMES = ('v<sub>max</sub>', 'n<sub>c</sub>', 'k')
-class CambridgeFit(object):
-    def __init__(self, m_total):
-        self.mtot = m_total
-
-    def fit_cambridge(self, t, vmax, nc, k):
-        if nc < 0 or nc > 10 or k < 0 or k > 1e12:
-            return 0
-        ins = (nc * k * self.mtot**nc)**0.5
-        try:
-            outs = scipy.vectorize(math.cosh)(ins * t)
-        except OverflowError, e:
-            return 0
-        return vmax * (1 - outs ** (-2./nc))
-
-
-FITTING_PAIRS = dict(basic = (fit_basic, \
-                              FIT_BASIC_INIT, \
-                              FIT_BASIC_PARAM_NAMES),
-                     nucleation_elongation = (CambridgeFit(75e-6).fit_cambridge, \
-                                              FIT_CAMBRIDGE_INIT, \
-                                              FIT_CAMBRIDGE_PARAM_NAMES)
-                     )
+FITTING_PAIRS = models.get_models()
 
 
 #############

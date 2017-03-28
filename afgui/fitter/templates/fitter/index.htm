@@ -113,11 +113,18 @@
       <br></p><p>
         <span id="input_message_user" class="hidden" role="alert"></span>
       </p>
+      <p>
       Model: <select id="model_choice">
           <option value="auto" selected="selected">Automatic Best Model</option>
           <option value="basic">Basic One-site Binding</option>
           <option value="nucleation_elongation">Nucleation-Elongation Model</option>
       </select>
+      </p>
+
+      <p>
+      <input type="checkbox" id="noise_only_above" value="noise_only_above" checked>
+      Noise is Always Above Signal
+      </p>
 
       <div class="page-header">
         <h1>Data Analysis</h1>

@@ -72,43 +72,57 @@ def fit_data(fnames, model, threshold_points=None, rev_threshold_points=None, ap
     adata = scipy.array(data).T
     return TO_JSON, tfitter.plot_two_to_svg(adata[0], adata[1], [0.5*i for i in xrange(len(sim_data))], sim_data), RETTYPE
 
-def _clean_data_short(data, sim_data, noise_threshold):
-    new_data = filter(lambda (t,v): v-sim_data[int(t*2)] < noise_threshold, data)
+def _clean_data_short(data, sim_data, noise_threshold, noise_only_above=True):
+    if noise_only_above:
+        fltr = lambda (t,v): v-sim_data[int(t*2)] < noise_threshold
+    else:
+        fltr = lambda (t,v): abs(v-sim_data[int(t*2)]) < noise_threshold
+    new_data = filter(fltr, data)
     adata = scipy.array(new_data).T
     return adata, new_data
 
-def _clean_data(fnames, model, noise_threshold, threshold_points=None, rev_threshold_points=None, approx_start=None):
+def _clean_data(fnames, model, noise_threshold, threshold_points=None, rev_threshold_points=None, approx_start=None, noise_only_above=True):
     # parse parameters
-    noise_threshold = int(noise_threshold[0])
+    if isinstance(noise_threshold[0], int):
+        noise_threshold = noise_threshold[0]
+    elif noise_threshold[0].isdigit():
+        noise_threshold = int(noise_threshold[0])
+    elif noise_threshold[0].replace('.','').isdigit():
+        noise_threshold = int(float(noise_threshold[0]))
+    else:
+        raise ValueError("Noise threshold has illegal value %r" % noise_threshold[0])
     # run fitting
     data, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start)
     # find basal level
     baseline = tfitter.find_absolute_baseline(data)
     # clean data
-    adata, new_data = _clean_data_short(data, sim_data, noise_threshold)
+    adata, new_data = _clean_data_short(data, sim_data, noise_threshold, noise_only_above)
     return adata, new_data, baseline, params
 
-def clean_data(fnames, model, noise_threshold, threshold_points=None, rev_threshold_points=None, approx_start=None):
+def clean_data(fnames, model, noise_threshold, threshold_points=None, rev_threshold_points=None, approx_start=None, noise_only_above=None):
     # prepare return type
     TO_JSON = True
     RETM = "OK"
     # run clean
-    adata, new_data, baseline, params = _clean_data(fnames, model, noise_threshold, threshold_points, rev_threshold_points, approx_start)
+    noise_only_above = noise_only_above is not None
+    adata, new_data, baseline, params = _clean_data(fnames, model, noise_threshold, threshold_points, rev_threshold_points, approx_start, noise_only_above)
     # return clean figure and fitting parameters
     return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, params.pop('model'), params.pop('t1'), params.pop('t2'), params], RETM
 
-def clean_data_optimise_noise_threshold(fnames, model, threshold_points=None, rev_threshold_points=None, approx_start=None):
+def clean_data_optimise_noise_threshold(fnames, model, threshold_points=None, rev_threshold_points=None, approx_start=None, noise_only_above=None):
     # prepare return type
     TO_JSON = True
     RETM = "OK"
+    # parse params
+    noise_only_above = noise_only_above is not None
     # optimisation loop
     data, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start)
     span = max(data, key=lambda (t,v):v)[1] - min(data, key=lambda (t,v):v)[1]
     noise_threshold = span / 3.
     ##last_reduction = 0
     for i in xrange(MAX_THRESHOLD_SEARCH_ITERATIONS):
-        adata1, new_data1 = _clean_data_short(data, sim_data, noise_threshold)
-        adata2, new_data2 = _clean_data_short(data, sim_data, noise_threshold/2.)
+        adata1, new_data1 = _clean_data_short(data, sim_data, noise_threshold, noise_only_above)
+        adata2, new_data2 = _clean_data_short(data, sim_data, noise_threshold/2., noise_only_above)
         diff = set(new_data1) - set(new_data2)
         th2rem = set(data) - set(new_data2)
         # TODO: stop iteration if gain diminishes
@@ -128,16 +142,18 @@ def clean_data_optimise_noise_threshold(fnames, model, threshold_points=None, re
             break
     # final run!
     noise_threshold = int(noise_threshold+0.5)
-    adata, new_data, baseline, params = _clean_data(fnames, model, [noise_threshold], threshold_points, rev_threshold_points, approx_start)
+    adata, new_data, baseline, params = _clean_data(fnames, model, [noise_threshold], threshold_points, rev_threshold_points, approx_start, noise_only_above)
     # return clean figure and fitting parameters
     return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, params.pop('model'), params.pop('t1'), params.pop('t2'), params], RETM
 
-def get_clean_data(fnames, model, noise_threshold, output_fnames, threshold_points=None, rev_threshold_points=None, approx_start=None):
+def get_clean_data(fnames, model, noise_threshold, output_fnames, threshold_points=None, rev_threshold_points=None, approx_start=None, noise_only_above=None):
     # prepare return type
     TO_JSON = False
     RETTYPE = 'text/plain'
+    # parse params
+    noise_only_above = noise_only_above is not None
     # run clean
-    adata, new_data, baseline, params = _clean_data(fnames, model, noise_threshold, threshold_points, rev_threshold_points, approx_start)
+    adata, new_data, baseline, params = _clean_data(fnames, model, noise_threshold, threshold_points, rev_threshold_points, approx_start, noise_only_above)
     # prepare file
     new = ['XYDATA,values']
     for x,y in new_data:
