@@ -19,7 +19,9 @@ def _get_tmp_dir():
 # Create your views here.
 def index(request):
     tmplt = template.loader.get_template('fitter/index.htm')
-    return http.HttpResponse(tmplt.render(dict(tmp_file = os.path.join(_get_tmp_dir(), TMP_FILENAME)), request))
+    return http.HttpResponse(tmplt.render(dict(tmp_file = os.path.join(_get_tmp_dir(), TMP_FILENAME),
+                                               model_choice = [(model, fbackend.tfitter.FITTING_PAIRS[model][3]) for model in fbackend.tfitter.FITTING_PAIRS.keys()],
+                                              ), request))
 
 def test(request):
     tmplt = template.loader.get_template('fitter/test.htm')

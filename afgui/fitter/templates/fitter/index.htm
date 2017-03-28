@@ -116,8 +116,9 @@
       <p>
       Model: <select id="model_choice">
           <option value="auto" selected="selected">Automatic Best Model</option>
-          <option value="basic">Basic One-site Binding</option>
-          <option value="nucleation_elongation">Nucleation-Elongation Model</option>
+          {% for id, name in model_choice %}
+              <option value="{{ id }}">{{ name }}</option>
+          {% endfor %}
       </select>
       </p>
 

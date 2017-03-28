@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 # for debugging
 import inspect
 # this package
-import models
+import kmodels
 
 #########
 # UTILS #
@@ -373,7 +373,7 @@ def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=Fal
 # FITTING FUNCTIONS #
 #####################
 
-FITTING_PAIRS = models.get_models()
+FITTING_PAIRS = kmodels.get_models()
 
 
 #############

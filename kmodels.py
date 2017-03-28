@@ -27,9 +27,11 @@ class CambridgeFit(object):
 def get_models():
     return dict(basic = (fit_basic, \
                          FIT_BASIC_INIT, \
-                         FIT_BASIC_PARAM_NAMES),
+                         FIT_BASIC_PARAM_NAMES, \
+                         'Basic One-Site Binding'),
                 nucleation_elongation = (CambridgeFit(75e-6).fit_cambridge, \
                                          FIT_CAMBRIDGE_INIT, \
-                                         FIT_CAMBRIDGE_PARAM_NAMES)
+                                         FIT_CAMBRIDGE_PARAM_NAMES, \
+                                         'Nucleation Elongation'),
                 )
 
