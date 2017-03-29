@@ -353,7 +353,7 @@ def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=Fal
     # fitting loop
     best = None
     best_score = None
-    for name, (fit_func, init_values, param_names) in fit_pairs.iteritems():
+    for name, (fit_func, init_values, param_names, human_name) in fit_pairs.iteritems():
         init_values = init_values(apparent_max, baseline)
         try:
             popt, pcov = curve_fit(fit_func, x_vals, y_vals, p0=init_values, maxfev=2500)
