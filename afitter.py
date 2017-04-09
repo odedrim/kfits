@@ -325,7 +325,7 @@ def fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, fit_func, ini
     ##return [x[0]-t1 for x in to_fit], [x[1]-baseline for x in to_fit]
     return popt, perr
 
-def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=False):
+def choose_best_model(data, baseline, approx_start, t1, t2, apparent_max, fit_pairs, debug=False):
     """
     Fit the main aggregation period data with (t*vmax)/(t+t1/2)) kinetics.
 
@@ -333,6 +333,8 @@ def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=Fal
     @type data: List of 2-tuples
     @param baseline: The calculated baseline of the curve
     @type baseline: float
+    @param approx_start: Approximate time of beginning of kinetics, estimated by the user
+    @type approx_start: number
     @param t1: Time of the beginning of the aggregation kinetics
     @type t1: number
     @param t2: Time of the end of the aggregation kinetics
@@ -360,9 +362,9 @@ def choose_best_model(data, baseline, t1, t2, apparent_max, fit_pairs, debug=Fal
         except Exception, e:
             print "Encountered error trying to fit data with %r: %s" % (name, e)
             continue
-        score = sum([abs(y_vals[i] - (baseline + fit_func(x_vals[i], *popt))) for i in xrange(len(y_vals))])
+        score = sum([(y_vals[i] - (baseline + fit_func(x_vals[i], *popt)))**2 for i in xrange(len(y_vals)) if to_fit[i][0]>approx_start])
         if debug:
-            _debug(dict(model_name=name, score=score))
+            _debug(dict(model_name=name, score=score, old_score=sum([abs(y_vals[i] - (baseline + fit_func(x_vals[i], *popt))) for i in xrange(len(y_vals))])))
         if best is None or score < best_score:
             best = name
             best_score = score
@@ -387,7 +389,7 @@ def fit_data(data, model='auto', approx_start=120, debug=False):
     t2, apparent_max = find_apparent_maximum(data, debug=debug)
     # choose model
     if model == 'auto':
-        model = choose_best_model(data, baseline, t1, t2, apparent_max, FITTING_PAIRS, debug=True)
+        model = choose_best_model(data, baseline, approx_start, t1, t2, apparent_max, FITTING_PAIRS, debug=True)
         if model is None:
             raise RuntimeError("None of the models successfully fit the data!")
     fit_pair = FITTING_PAIRS[model]
