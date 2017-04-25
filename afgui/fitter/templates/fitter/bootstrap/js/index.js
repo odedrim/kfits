@@ -100,6 +100,12 @@ $(document).ready(function() {
             });
     });
 
+    $('.loadExample').click(function() {
+        $('#fdata').attr('class', 'btn btn-success');
+        $("#input_path").val($(this).attr('path'));
+        run_analysis();
+    });
+
     $('#input_clear').bind('click', function() {
         $('#fdata').val("");
         $('#fdata').attr("class", "btn btn-primary");

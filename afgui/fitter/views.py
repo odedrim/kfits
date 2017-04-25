@@ -1,6 +1,7 @@
 import os
 import mimetypes
 import json
+import inspect
 # django
 from django.shortcuts import render
 from django import http
@@ -19,7 +20,11 @@ def _get_tmp_dir():
 # Create your views here.
 def index(request):
     tmplt = template.loader.get_template('fitter/index.htm')
+    parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))))
     return http.HttpResponse(tmplt.render(dict(tmp_file = os.path.join(_get_tmp_dir(), TMP_FILENAME),
+                                               example1 = os.path.join(parent_dir, 'example1.csv'),
+                                               example2 = os.path.join(parent_dir, 'example2.csv'),
+                                               example3 = os.path.join(parent_dir, 'example3.csv'),
                                                model_choice = [(model, fbackend.tfitter.FITTING_PAIRS[model][3]) for model in fbackend.tfitter.FITTING_PAIRS.keys()],
                                               ), request))
 

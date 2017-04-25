@@ -101,6 +101,11 @@
       <div class="page-header">
         <h1>Input and Parameters</h1>
       </div>
+      <p>
+          <button class="btn btn-info loadExample" path="{{ example1 }}">Load Example 1</button>
+          <button class="btn btn-info loadExample" path="{{ example2 }}">Load Example 2</button>
+          <button class="btn btn-info loadExample" path="{{ example3 }}">Load Example 3</button>
+      </p>
         <form enctype="multipart/form-data">
             {% csrf_token %}
             <input id="fdata" name="fdata" type="file" class="btn btn-primary" style="display:inline-block;" />
