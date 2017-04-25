@@ -362,9 +362,9 @@ def choose_best_model(data, baseline, approx_start, t1, t2, apparent_max, fit_pa
         except Exception, e:
             print "Encountered error trying to fit data with %r: %s" % (name, e)
             continue
-        score = sum([(y_vals[i] - (baseline + fit_func(x_vals[i], *popt)))**2 for i in xrange(len(y_vals)) if to_fit[i][0]>approx_start])
+        score = sum([(y_vals[i] - fit_func(x_vals[i], *popt))**2 for i in xrange(len(y_vals)) if to_fit[i][0]>approx_start])
         if debug:
-            _debug(dict(model_name=name, score=score, old_score=sum([abs(y_vals[i] - (baseline + fit_func(x_vals[i], *popt))) for i in xrange(len(y_vals))])))
+            _debug(dict(model_name=name, score=score, old_score=sum([abs(y_vals[i] - fit_func(x_vals[i], *popt)) for i in xrange(len(y_vals))])))
         if best is None or score < best_score:
             best = name
             best_score = score
