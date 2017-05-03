@@ -94,7 +94,7 @@ function clean_data(callback, threshold) {
     } else {
         var func = 'clean_data&noise_threshold=' + threshold;
     }
-    $.getJSON('backend?function=' + func + '&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + ($('#noise_only_above').is(':checked') ? '&noise_only_above' : ''), function(data) {
+    $.getJSON('backend?function=' + func + '&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + ($('#noise_only_above').is(':checked') ? '&noise_only_above' : '') + ($('#reaches_plateau').is(':checked') ? '&search_for_end' : ''), function(data) {
         // cleanup
         $('.auto_kinetics').remove();
         // parse data

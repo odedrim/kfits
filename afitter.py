@@ -180,8 +180,10 @@ def closest_t(data, t):
             return cur
         else:
             cur += inc
-            if cur == 0 or cur == len(data)-1:
-                return None
+            if cur == 0:
+                return
+            elif cur == len(data)-1:
+                return cur
     return None
 
 def find_absolute_baseline(data, debug=False):
@@ -392,11 +394,14 @@ FITTING_PAIRS = kmodels.get_models()
 # INTERFACE #
 #############
 
-def fit_data(data, model='auto', approx_start=120, debug=False):
+def fit_data(data, model='auto', approx_start=120, search_for_end=True, debug=False):
     # find initiation
     baseline, t1 = find_aggregation_initiation(data, approx=approx_start, debug=debug)
     # find plateau
-    t2, apparent_max = find_apparent_maximum(data, debug=debug)
+    if search_for_end:
+        t2, apparent_max = find_apparent_maximum(data, debug=debug)
+    else:
+        t2, apparent_max = data[-1]
     # choose model
     if model == 'auto':
         model = choose_best_model(data, baseline, approx_start, t1, t2, apparent_max, FITTING_PAIRS, debug=True)

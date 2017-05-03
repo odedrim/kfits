@@ -124,7 +124,7 @@ $(document).ready(function() {
             var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
             coords = get_clean_coords('bottom');
             var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-            $('#fig2').html('<img src="backend?function=plot_data&fnames=' + $('#input_path').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '">');
+            $('#fig2').html('<img src="backend?function=plot_data&fnames=' + $('#input_path').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&_=' + new Date().getTime() + '">');
             $('#approx_start').show();
             $('#fig_b_filt').click();
             $('#fit_data').show();
@@ -144,7 +144,7 @@ $(document).ready(function() {
     $('#fit_data').bind('click', function() {
         // clean data with automatic noise threshold optimisation
         clean_data(function(text_top_coords, text_bottom_coords) { 
-            $('#fig3').html('<img src="backend?function=fit_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '">');
+            $('#fig3').html('<img src="backend?function=fit_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + ($('#reaches_plateau').is(':checked') ? '&search_for_end' : '') + '">');
             $('#fig_b_fit').click();
             $('#arrow_to_results').delay(2000).fadeIn(1000).fadeOut(1000).fadeIn(1000).fadeOut(1000).fadeIn(1000).fadeOut(1000);
             set_progress($('#total_progress'), 100, 'Fitting Done!');
@@ -186,6 +186,6 @@ $(document).ready(function() {
         var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
         coords = get_clean_coords('bottom');
         var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-        window.location = 'backend?function=get_clean_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '&output_fnames=' + $('#fdata').get(0).files[0].name + '_clean.csv' + ($('#noise_only_above').is(':checked') ? '&noise_only_above' : '');
+        window.location = 'backend?function=get_clean_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '&output_fnames=' + $('#fdata').get(0).files[0].name + '_clean.csv' + ($('#noise_only_above').is(':checked') ? '&noise_only_above' : '') + ($('#reaches_plateau').is(':checked') ? '&search_for_end' : '');
     });
 });
