@@ -118,6 +118,10 @@ $(document).ready(function() {
         input_cleanup();
     });
 
+    $('#model_choice').change(function() {$('#gross_filter').trigger('click')});
+    $('#noise_only_above').change(function() {$('#gross_filter').trigger('click')});
+    $('#reaches_plateau').change(function() {$('#gross_filter').trigger('click')});
+
     $('#gross_filter').bind('click', function() {
         if (is_ok_to_run()) {
             coords = get_clean_coords('top');
