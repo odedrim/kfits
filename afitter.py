@@ -14,10 +14,14 @@ import kmodels
 #########
 
 def _debug(d):
-    print >> sys.stderr, inspect.getouterframes(inspect.currentframe(), 2)[1][3]
+    last_func_name = _debug.__dict__.setdefault('last_func', None)
+    func_name = inspect.getouterframes(inspect.currentframe(), 2)[1][3]
+    if last_func_name != func_name:
+        print >> sys.stderr
+        print >> sys.stderr, func_name
+    _debug.__dict__['last_func'] = func_name
     for k,v in d.iteritems():
         print >> sys.stderr, '\t',k,'=',repr(v)
-    print >> sys.stderr
 
 def check_threshold(point, threshold_points):
     """
@@ -108,7 +112,8 @@ def parse_fluorometer_csv(path, threshold_points=None, rev_threshold_points=None
         raise TypeError("Do not have reading permissions for %s" % path)
     else:
         data = file(path, 'r').read()
-    print >> sys.stderr, "parse_fluorometer_csv(%r, %r, %r)" % (path, threshold_points, rev_threshold_points)
+    if debug:
+        _debug(dict(path=path, threshold_points=threshold_points, rev_threshold_points=rev_threshold_points))
     retval = []
     started = False
     ended = False
@@ -118,7 +123,7 @@ def parse_fluorometer_csv(path, threshold_points=None, rev_threshold_points=None
     else:
         sep = ','
     for line in data.splitlines():
-        if line.startswith('XYDATA'):
+        if 'XYDATA' in line:
             started = True
         elif started and not ended:
             if line.strip() == "":
@@ -218,12 +223,16 @@ def find_aggregation_initiation(data, approx=120, debug=False):
     @return: Basal value and Time of aggregation beginning (baseline, t1)
     @rtype: tuple (float, float)
     """
+    if debug:
+        _debug(dict(data_len=len(data), beginning=data[:10], approx=approx))
     RANGE_WIDTH = 40
     # find last 30 seconds before approximate init
     end_idx = closest_t(data, approx)
     if end_idx is None:
         end_idx = len(data) - 1
-    tmp_data = scipy.array(data[end_idx - 60:end_idx + 1])
+    if debug:
+        _debug({'end index':end_idx})
+    tmp_data = scipy.array(data[end_idx - 60 if end_idx > 60 else 0:end_idx + 1])
     mean = tmp_data.mean(0)[1]
     stdev = tmp_data.std(0)[1]
     # filter out "bad" data points
@@ -234,7 +243,8 @@ def find_aggregation_initiation(data, approx=120, debug=False):
         _debug(dict(mean=mean, stdev=stdev, better_mean=better_mean, better_stdev=better_stdev))
     # locate t1
     best_idx = end_idx
-    for i in xrange(end_idx - RANGE_WIDTH, end_idx + RANGE_WIDTH + 1):
+    range_width = RANGE_WIDTH if RANGE_WIDTH < end_idx else end_idx
+    for i in xrange(end_idx - range_width, end_idx + range_width + 1):
         smean = sum([x[1] for x in data[i:i+10]]) / 10.
         if smean > better_mean + 1.5 * better_stdev:
             best_idx = i
@@ -318,7 +328,7 @@ def fit_aggregation_kinetics(data, baseline, t1, t2, apparent_max, fit_func, ini
     @rtype: tuple, tuple
     """
     to_fit = data[closest_t(data,t1):closest_t(data,t2)+1]
-    popt, pcov = curve_fit(fit_func, [x[0]-t1 for x in to_fit], [x[1]-baseline for x in to_fit], p0=init_values, maxfev=2500)
+    popt, pcov = curve_fit(fit_func, [x[0]-t1 for x in to_fit], [x[1]-baseline for x in to_fit], p0=init_values, maxfev=10000)
     if debug:
         _debug(dict(popt=popt, pcov=pcov))
     perr = scipy.sqrt(scipy.diag(pcov))
@@ -358,13 +368,13 @@ def choose_best_model(data, baseline, approx_start, t1, t2, apparent_max, fit_pa
     for name, (fit_func, init_values, param_names, human_name) in fit_pairs.iteritems():
         init_values = init_values(apparent_max, baseline)
         try:
-            popt, pcov = curve_fit(fit_func, x_vals, y_vals, p0=init_values, maxfev=2500)
+            popt, pcov = curve_fit(fit_func, x_vals, y_vals, p0=init_values, maxfev=10000)
         except Exception, e:
-            print "Encountered error trying to fit data with %r: %s" % (name, e)
+            print >> sys.stderr, "Encountered error trying to fit data with %r: %s" % (name, e)
             continue
         score = sum([(y_vals[i] - fit_func(x_vals[i], *popt))**2 for i in xrange(len(y_vals)) if to_fit[i][0]>approx_start])
         if debug:
-            _debug(dict(model_name=name, score=score, old_score=sum([abs(y_vals[i] - fit_func(x_vals[i], *popt)) for i in xrange(len(y_vals))])))
+            _debug(dict(approx_start=approx_start, model_name=name, score=score, old_score=sum([abs(y_vals[i] - fit_func(x_vals[i], *popt)) for i in xrange(len(y_vals))])))
         if best is None or score < best_score:
             best = name
             best_score = score
@@ -420,8 +430,8 @@ def fit_data(data, model='auto', approx_start=120, debug=False):
 ##########################
 
 def main(args):
-    if len(args) != 1:
-        print >> sys.stderr, "Usage: %s <csv file path>" % sys.argv[0]
+    if len(args) < 1 or len(args) > 2:
+        print >> sys.stderr, "Usage: %s <csv file path> (<approx start>)" % sys.argv[0]
         return 1
     try:
         from matplotlib import pyplot
@@ -429,7 +439,11 @@ def main(args):
         print >> sys.stderr, "The command line interface requires installation of the python matplotlib package."
         return 1
     data = parse_fluorometer_csv(args[0], debug=True)
-    sim_data, params = fit_data(data, debug=True)
+    _debug({'data length':len(data)})
+    if len(args) > 1:
+        sim_data, params = fit_data(data, approx_start=int(args[1]), debug=True)
+    else:
+        sim_data, params = fit_data(data, debug=True)
     for item in params.iteritems():
         print '%s: %s' % item
     pyplot.plot([x[0] for x in data], [x[1] for x in data])

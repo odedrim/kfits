@@ -57,10 +57,10 @@ def _fit_data(fnames, model, threshold_points=None, rev_threshold_points=None, a
     fname = fnames[0]
     threshold_points = _calibrate_threshold_points(eval(threshold_points[0]), FIG_W, FIG_H) if threshold_points else None
     rev_threshold_points = _calibrate_threshold_points(eval(rev_threshold_points[0]), FIG_W, FIG_H) if rev_threshold_points else None
-    approx_start = float(approx_start[0]) if approx_start else 0
+    approx_start = float(approx_start[0])/FIG_W if approx_start else 0
     # run
     data = tfitter.parse_fluorometer_csv(fname, threshold_points, rev_threshold_points)
-    sim_data, params = tfitter.fit_data(data, approx_start=approx_start, model=model)
+    sim_data, params = tfitter.fit_data(data, approx_start=approx_start*data[-1][0], model=model)
     return data, sim_data, params
 
 def fit_data(fnames, model, threshold_points=None, rev_threshold_points=None, approx_start=None):
