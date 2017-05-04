@@ -283,7 +283,7 @@ def find_apparent_maximum(data, range_to_fit=120, minimal_t2=350., debug=False):
         _debug(dict(fit_a=a, fit_b=b))
     ##perr = scipy.sqrt(scipy.diag(pcov))
     # calculate standard distance from line
-    diffs = scipy.array([(a*x[0]+b)-x[1] for x in data])
+    diffs = scipy.array([abs((a*x[0]+b)-x[1]) for x in data])
     fit_dev = diffs[-range_to_fit:].std()
     # forecast backwards using line, find point of divergence from linearity
     bins = [sum(diffs[i:i+10])/10. for i in xrange(0,len(diffs),10)]
@@ -399,7 +399,7 @@ def fit_data(data, model='auto', approx_start=120, search_for_end=True, debug=Fa
     baseline, t1 = find_aggregation_initiation(data, approx=approx_start, debug=debug)
     # find plateau
     if search_for_end:
-        t2, apparent_max = find_apparent_maximum(data, debug=debug)
+        t2, apparent_max = find_apparent_maximum(data, minimal_t2=(data[-1][0]+approx_start)/2, debug=debug)
     else:
         t2, apparent_max = data[-1]
     # choose model

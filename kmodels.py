@@ -7,7 +7,7 @@ FIT_BASIC_PARAM_NAMES = ('v<sub>max</sub>', 't<sub>&#189;</sub>')
 def fit_basic(t, vmax, thalf):
     return (t * vmax) / (t + thalf)
 
-FIT_CAMBRIDGE_INIT = lambda apparent_max, baseline: (apparent_max-baseline, 3, 10000)
+FIT_CAMBRIDGE_INIT = lambda apparent_max, baseline: (apparent_max-baseline, 1.1, 1000)
 FIT_CAMBRIDGE_PARAM_NAMES = ('v<sub>max</sub>', 'n<sub>c</sub>', 'k')
 class CambridgeFit(object):
     def __init__(self, m_total):
