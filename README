@@ -18,6 +18,8 @@ Dana: danare AT mail.huji.ac.il
 
 # Installation Instructions
 
+Executive Summary: `pip install kfits`
+
 ## 1 Get Python 2.7
 
 If you already have Python 2 (2.6 or later, but not 3.x) installed, skip to step 2. If you have both Python 2 and Python 3 installed, that's fine too. If you're working on a linux system, chances are you already have Python 2.7 installed.

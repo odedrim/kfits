@@ -1,4 +1,10 @@
+import platform
 from setuptools import setup
+
+top_fnames = ['LICENSE','README','README.md']
+# overcome annoying compatability bug
+if platform.system() != 'Windows':
+    top_fnames = ['.'+x for x in top_fnames]
 
 setup(name = 'kfits',
       version = '1.0',
@@ -14,7 +20,7 @@ setup(name = 'kfits',
                   'kfits.afgui.afgui',
                   'kfits.afgui.fitter',
                   'kfits.afgui.fitter.migrations'],
-      package_data = {'kfits': [],
+      package_data = {'kfits': top_fnames,
                       'kfits.afgui': ['db.sqlite3', 'example*.csv'],
                       'kfits.afgui.afgui': ['LICENSE'],
                       'kfits.afgui.fitter': ['templates/*.*', 'templates/fitter/*.*', 'templates/fitter/bootstrap/*.*', 'templates/fitter/bootstrap/assets/*.*', 'templates/fitter/bootstrap/css/*', 'templates/fitter/bootstrap/fonts/*', 'templates/fitter/bootstrap/js/*', 'templates/fitter/bootstrap/assets/brand/*', 'templates/fitter/bootstrap/assets/css/*.*', 'templates/fitter/bootstrap/assets/flash/*', 'templates/fitter/bootstrap/assets/img/*', 'templates/fitter/bootstrap/assets/js/*.*', 'templates/fitter/bootstrap/assets/css/src/*', 'templates/fitter/bootstrap/assets/js/src/*', 'templates/fitter/bootstrap/assets/js/vendor/*']},
