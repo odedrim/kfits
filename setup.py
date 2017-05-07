@@ -14,10 +14,10 @@ setup(name = 'kfits',
                   'kfits.afgui.afgui',
                   'kfits.afgui.fitter',
                   'kfits.afgui.fitter.migrations'],
-      package_data = {'kfits': ['LICENSE', 'README'],
+      package_data = {'kfits': [],
                       'kfits.afgui': ['db.sqlite3', 'example*.csv'],
                       'kfits.afgui.afgui': ['LICENSE'],
-                      'kfits.afgui.fitter': ['templates/*.*', 'templates/fitter/*.*', 'templates/fitter/bootstrap/*', 'templates/fitter/bootstrap/assets/*', 'templates/fitter/bootstrap/css/*', 'templates/fitter/bootstrap/fonts/*', 'templates/fitter/bootstrap/js/*', 'templates/fitter/bootstrap/assets/brand/*', 'templates/fitter/bootstrap/assets/css/*', 'templates/fitter/bootstrap/assets/flash/*', 'templates/fitter/bootstrap/assets/img/*', 'templates/fitter/bootstrap/assets/js/*', 'templates/fitter/bootstrap/assets/css/src/*', 'templates/fitter/bootstrap/assets/js/src/*', 'templates/fitter/bootstrap/assets/js/vendor/*']},
+                      'kfits.afgui.fitter': ['templates/*.*', 'templates/fitter/*.*', 'templates/fitter/bootstrap/*.*', 'templates/fitter/bootstrap/assets/*', 'templates/fitter/bootstrap/css/*', 'templates/fitter/bootstrap/fonts/*', 'templates/fitter/bootstrap/js/*', 'templates/fitter/bootstrap/assets/brand/*', 'templates/fitter/bootstrap/assets/css/*.*', 'templates/fitter/bootstrap/assets/flash/*', 'templates/fitter/bootstrap/assets/img/*', 'templates/fitter/bootstrap/assets/js/*.*', 'templates/fitter/bootstrap/assets/css/src/*', 'templates/fitter/bootstrap/assets/js/src/*', 'templates/fitter/bootstrap/assets/js/vendor/*']},
       entry_points = {'console_scripts': ['kfits = kfits.afgui.manage:run_with_default_settings',
                                           'kfits_server = kfits.afgui.manage:run_as_server']}
       )

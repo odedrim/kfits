@@ -45,7 +45,7 @@ $(document).ready(function() {
         if (size > MAX_UPLOAD_SIZE) {
             message_user("<strong>Notice!</strong> You are about to upload a file bigger than what the system can handle!", "warning");
             $("#fdata").attr("class", "btn btn-warning");
-        } else if ((type != 'text/plain') && (type != 'application/vnd.ms-excel')) {
+        } else if ((type != 'text/plain') && (type != 'text/csv') && (type != 'application/vnd.ms-excel')) {
             if (type == "") {
                 type = "UNKNOWN FILETYPE";
             }
@@ -190,6 +190,11 @@ $(document).ready(function() {
         var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
         coords = get_clean_coords('bottom');
         var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-        window.location = 'backend?function=get_clean_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '&output_fnames=' + $('#fdata').get(0).files[0].name + '_clean.csv' + ($('#noise_only_above').is(':checked') ? '&noise_only_above' : '') + ($('#reaches_plateau').is(':checked') ? '&search_for_end' : '');
+        if ($('#fdata').get(0).files.length) {
+            var filename = $('#fdata').get(0).files[0].name;
+        } else {
+            var filename = 'unknown';
+        }
+        window.location = 'backend?function=get_clean_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '&output_fnames=' + filename + '_clean.csv' + ($('#noise_only_above').is(':checked') ? '&noise_only_above' : '') + ($('#reaches_plateau').is(':checked') ? '&search_for_end' : '');
     });
 });
