@@ -16,6 +16,13 @@ Dana: danare AT mail.huji.ac.il
 
 ---
 
+# Usage
+
+Once you have *Kfits* installed on your system, simply type `kfits` in a command line / terminal window (on Windows: Command Prompt or the Windows Run command).
+To act as a server for other computers on the local network, use `kfits_server` instead, and type in the IP interface you would like to serve on (0.0.0.0 for all interfaces) and the port to serve on (8000 is usually fine) as prompted.
+
+---
+
 # Installation Instructions
 
 Executive Summary: `pip install kfits`
@@ -78,7 +85,7 @@ Seriously. That's it.
 You can download the source code of *Kfits* from [github](https://github.com/odedrim/kfits). Either clone it with git (go to a directory of your choice, type in `git clone https://github.com/odedrim/kfits`, and you'll have a subdirectory named `kfits` containing the source code) or download as ZIP and unzip it to a directory of your choice.
 Once you have a directory which contains the source code of kfits, change dir (`cd`) to that directory and type `python setup.py install` or `sudo python setup.py install` (to install with root privileges on a linux-based system)... And you're done.
 
-### Precompiled Packacges (binary distributions)
+### Precompiled Packages (binary distributions)
 We will do our best to precompile binary packages for as many operating systems and environments as we can - but eventually we are just Biochemists in the academy, we don't really have access to that many different systems.
 The binary distributions will be made available at [github](https://github.com/odedrim/kfits), in the [install directory](https://github.com/odedrim/kfits/tree/master/install). To install them, simply download the one best suited to your setup, and double click / run it to install.
 
