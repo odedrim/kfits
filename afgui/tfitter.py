@@ -14,7 +14,7 @@ except ImportError:
 #########
 
 SVG_TEMPLATE = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="%(width)d" height="%(height)d" viewBox="0 0 %(width)d %(height)d" preserveAspectRatio="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="%(width)d" height="%(height)d" %(classes)s viewBox="0 0 %(width)d %(height)d" preserveAspectRatio="none">
     <defs>
         <style type="text/css" />
     </defs>
@@ -25,7 +25,7 @@ SVG_TEMPLATE = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 SVG_PATH_TEMPLATE = """<path style="fill:none; stroke:%(color)s; stroke-width:1px"
     d="%(path)s" />"""
 
-def plot_to_svg(xx, yy, w=900, h=600, color="#000000"):
+def plot_to_svg(xx, yy, w, h, color="#000000", classes=[]):
     min_x, max_x = min(xx), max(xx)
     min_y, max_y = min(yy), max(yy)
     norm_xx = (scipy.array(xx) - min_x) / (max_x - min_x) * w
@@ -37,9 +37,10 @@ def plot_to_svg(xx, yy, w=900, h=600, color="#000000"):
                                     path = ' '.join(retval))
     return SVG_TEMPLATE % dict(width = w,
                                height = h,
-                               gdata = path)
+                               gdata = path,
+                               classes = ('class="%s"' % ' '.join(classes)) if classes else '')
 
-def plot_two_to_svg(xx1, yy1, xx2, yy2, w=900, h=600, color1="#000000", color2="#ff4414"):
+def plot_two_to_svg(xx1, yy1, xx2, yy2, w, h, color1="#000000", color2="#ff4414"):
     min_x, max_x = min(min(xx1),min(xx2)), max(max(xx1),max(xx2))
     min_y, max_y = min(min(yy1),min(yy2)), max(max(yy1),max(yy2))
     norm_xx1 = (scipy.array(xx1) - min_x) / (max_x - min_x) * w
@@ -58,4 +59,5 @@ def plot_two_to_svg(xx1, yy1, xx2, yy2, w=900, h=600, color1="#000000", color2="
                                      path = ' '.join(retval))
     return SVG_TEMPLATE % dict(width = w,
                                height = h,
-                               gdata = path1 + '\n' + path2)
+                               gdata = path1 + '\n' + path2,
+                               classes = '')

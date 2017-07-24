@@ -26,6 +26,8 @@ def index(request):
                                                example2 = os.path.join(parent_dir, 'example2.csv'),
                                                example3 = os.path.join(parent_dir, 'example3.csv'),
                                                model_choice = [(model, fbackend.tfitter.FITTING_PAIRS[model][3]) for model in fbackend.tfitter.FITTING_PAIRS.keys()],
+                                               width = fbackend.FIG_W,
+                                               height = fbackend.FIG_H,
                                               ), request))
 
 def test(request):

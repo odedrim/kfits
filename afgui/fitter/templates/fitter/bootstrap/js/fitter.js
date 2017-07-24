@@ -65,23 +65,33 @@ function run_analysis() {
     // cleanup everything
     fig_cleanup();
     // load figure
-    $('#fig1').html('<img src="backend?function=plot_data&fnames=' + $('#input_path').val() + '&_=' + new Date().getTime() + '">');
-    // create draglines
-    $('#top_dragline1').css({"left":"0px", "top":"0px"}).show();
-    $('#top_dragline2').css({"left":"450px", "top":"0px"}).show();
-    $('#top_dragline3').css({"left":"900px", "top":"0px"}).show();
-    coords = get_clean_coords('top');
-    $('#top_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
-    $('#bottom_dragline1').css({"left":"0px", "top":"595px"}).show();
-    $('#bottom_dragline2').css({"left":"450px", "top":"595px"}).show();
-    $('#bottom_dragline3').css({"left":"900px", "top":"595px"}).show();
-    coords = get_clean_coords('bottom');
-    $('#bottom_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
-    // move to original curve view
-    $('#fig_b_orig').click();
-    $('#gross_filter').show();
-    // progress
-    set_progress($('#total_progress'), 33.33, 'Data Loaded');
+    var img = $('<img />', {attr: {src: 'backend?function=plot_data&fnames=' + $('#input_path').val() + '&_=' + new Date().getTime()}}).load(function() { 
+        // get figure size
+        width = parseInt($('#fig1').attr('data-mywidth'));
+        height = parseInt($('#fig1').attr('data-myheight'));
+        // create draglines
+        $('#top_dragline1').css({"left":"0px", "top":"0px"}).show();
+        $('#top_dragline2').css({"left":parseInt(width/2)+"px", "top":"0px"}).show();
+        $('#top_dragline3').css({"left":width+"px", "top":"0px"}).show();
+        coords = get_clean_coords('top');
+        $('#top_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
+        var botdragline_top = (height - 5) + 'px';
+        $('#bottom_dragline1').css({"left":"0px", "top":botdragline_top}).show();
+        $('#bottom_dragline2').css({"left":parseInt(width/2)+"px", "top":botdragline_top}).show();
+        $('#bottom_dragline3').css({"left":width+"px", "top":botdragline_top}).show();
+        coords = get_clean_coords('bottom');
+        $('#bottom_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
+        // move to original curve view
+        $('#fig_b_orig').click();
+        $('#gross_filter').show();
+        // progress
+        set_progress($('#total_progress'), 33.33, 'Data Loaded');
+    })
+    .each(function() {
+        //Cache fix for browsers that don't trigger .load() - https://stackoverflow.com/questions/2392410/jquery-loading-images-with-complete-callback
+        if(this.complete) $(this).trigger('load');
+    });
+    img.appendTo($('#fig1'));
 }
 
 function clean_data(callback, threshold) {

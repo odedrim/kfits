@@ -23,17 +23,29 @@ $(document).ready(function() {
             $('#top_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
             coords = get_clean_coords('bottom');
             $('#bottom_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
+        },
+        stop: function() {
+            var max_left = parseInt($('#fig1').attr('data-mywidth'));
+            var left = $(this).css('left');
+            if (left.slice(0,-2) > max_left) {
+                $(this).css('left',max_left+'px');
+                coords = get_clean_coords('top');
+                $('#top_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
+                coords = get_clean_coords('bottom');
+                $('#bottom_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
+            }
         }
     });
 
     $('#approx_start').draggable({
         stop: function() {
+            var max_left = parseInt($('#fig1').attr('data-mywidth'));
             $(this).css('top','0px');
             var left = $(this).css('left');
             if (left.substr(0,1) == '-') {
                 $(this).css('left','0px');
-            } else if (left.slice(0,-2) > 900) {
-                $(this).css('left','900px');
+            } else if (left.slice(0,-2) > max_left) {
+                $(this).css('left',max_left+'px');
             }
         }
     });

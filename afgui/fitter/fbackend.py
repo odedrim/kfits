@@ -10,8 +10,10 @@ import tfitter
 # CONSTS #
 ##########
 # dimensions of visualisation
-FIG_W = 900
-FIG_H = 600
+FIG_W = 870
+FIG_H = 580
+SMALL_FIG_W = 520
+SMALL_FIG_H = 370
 # input file params
 MAX_FILE_SIZE = 10*1024*1024
 # noise reduction params
@@ -50,7 +52,7 @@ def plot_data(fnames, threshold_points=None, rev_threshold_points=None):
     rev_threshold_points = _calibrate_threshold_points(eval(rev_threshold_points[0]), FIG_W, FIG_H) if rev_threshold_points else None
     # run
     data = scipy.array(tfitter.parse_fluorometer_csv(fname, threshold_points, rev_threshold_points)).T
-    return TO_JSON, tfitter.plot_to_svg(data[0], data[1]), RETTYPE
+    return TO_JSON, tfitter.plot_to_svg(data[0], data[1], FIG_W, FIG_H), RETTYPE
 
 def _fit_data(fnames, model, threshold_points=None, rev_threshold_points=None, approx_start=None, search_for_end=True):
     # parse parameters
@@ -70,7 +72,7 @@ def fit_data(fnames, model, threshold_points=None, rev_threshold_points=None, ap
     # run
     data, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start, search_for_end is not None)
     adata = scipy.array(data).T
-    return TO_JSON, tfitter.plot_two_to_svg(adata[0], adata[1], [0.5*i for i in xrange(len(sim_data))], sim_data), RETTYPE
+    return TO_JSON, tfitter.plot_two_to_svg(adata[0], adata[1], [0.5*i for i in xrange(len(sim_data))], sim_data, FIG_W, FIG_H), RETTYPE
 
 def _clean_data_short(data, sim_data, noise_threshold, noise_only_above=True):
     if noise_only_above:
@@ -107,7 +109,7 @@ def clean_data(fnames, model, noise_threshold, threshold_points=None, rev_thresh
     noise_only_above = noise_only_above is not None
     adata, new_data, baseline, params = _clean_data(fnames, model, noise_threshold, threshold_points, rev_threshold_points, approx_start, noise_only_above, search_for_end)
     # return clean figure and fitting parameters
-    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, params.pop('model'), params.pop('t1'), params.pop('t2'), params], RETM
+    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], SMALL_FIG_W, SMALL_FIG_H, classes=['kfigure']), noise_threshold, params.pop('model'), params.pop('t1'), params.pop('t2'), params], RETM
 
 def clean_data_optimise_noise_threshold(fnames, model, threshold_points=None, rev_threshold_points=None, approx_start=None, noise_only_above=None, search_for_end=None):
     # prepare return type
@@ -144,7 +146,7 @@ def clean_data_optimise_noise_threshold(fnames, model, threshold_points=None, re
     noise_threshold = int(noise_threshold+0.5)
     adata, new_data, baseline, params = _clean_data(fnames, model, [noise_threshold], threshold_points, rev_threshold_points, approx_start, noise_only_above, search_for_end)
     # return clean figure and fitting parameters
-    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], 555, 395), noise_threshold, params.pop('model'), params.pop('t1'), params.pop('t2'), params], RETM
+    return TO_JSON, [tfitter.plot_to_svg(adata[0], adata[1], SMALL_FIG_W, SMALL_FIG_H, classes=['kfigure']), noise_threshold, params.pop('model'), params.pop('t1'), params.pop('t2'), params], RETM
 
 def get_clean_data(fnames, model, noise_threshold, output_fnames, threshold_points=None, rev_threshold_points=None, approx_start=None, noise_only_above=None, search_for_end=None):
     # prepare return type

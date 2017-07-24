@@ -1589,17 +1589,17 @@ pre code {
 }
 @media (min-width: 768px) {
   .container {
-    width: 750px;
+    width: 650px;
   }
 }
 @media (min-width: 992px) {
   .container {
-    width: 970px;
+    width: 870px;
   }
 }
 @media (min-width: 1200px) {
   .container {
-    width: 1170px;
+    width: 1070px;
   }
 }
 .container-fluid {
@@ -5970,7 +5970,7 @@ button.close {
 }
 @media (min-width: 768px) {
   .modal-dialog {
-    width: 600px;
+    width: 500px;
     margin: 30px auto;
   }
   .modal-content {
@@ -5983,7 +5983,7 @@ button.close {
 }
 @media (min-width: 992px) {
   .modal-lg {
-    width: 900px;
+    width: 800px;
   }
 }
 .tooltip {
