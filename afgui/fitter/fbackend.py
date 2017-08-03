@@ -2,8 +2,10 @@ import os
 import scipy
 import time
 import math
+import json
 # this package
 import tfitter
+from .models import KfitsSession
 
 
 ##########
@@ -160,8 +162,18 @@ def get_clean_data(fnames, model, noise_threshold, output_fnames, threshold_poin
     new = ['XYDATA,values']
     for x,y in new_data:
         new.append('%f,%f' % (x,y-baseline))
+    data = '\n'.join(new)
+    # save output to database
+    sid = fnames[0].rsplit('.',1)[0][-32:]
+    try:
+        session = KfitsSession.objects.get(sid=sid)
+        session.saved_output = data
+        session.kinetic_params = json.dumps(params)
+        session.save()
+    except Exception:
+        pass
     # return clean figure and fitting parameters
-    return TO_JSON, '\n'.join(new), RETTYPE, output_fnames[0]
+    return TO_JSON, data, RETTYPE, output_fnames[0]
 
 
 #########################

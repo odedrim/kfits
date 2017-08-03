@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Aggregation Data Fitter: Past Results</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap theme -->
+    <link href="bootstrap/css/bootstrap-theme.min.css" rel="stylesheet">
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="bootstrap/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="bootstrap/theme.css" rel="stylesheet">
+    <!-- Custom styles for this app -->
+    <link href="bootstrap/orimon.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="bootstrap/assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+  </head>
+
+  <body>
+
+  <div class="col-md-6">
+      <table class="table table-condensed">
+          <thead>
+              <tr>
+                  <th>Property</th>
+                  <th>Value</th>
+              </tr>
+          </thead>
+          <tbody id="kinetic_variables">
+      {% for param in kparams %}
+          <tr>
+              <td>{{ param.name |safe }}</td>
+              <td>{{ param.value |safe }}</td>
+          </tr>
+      {% endfor %}
+          </tbody>
+      </table>
+  </div>
+
+  <div class="col-md-6" style="clear:both;">
+      <form action="">
+          <input type="hidden" value="{{ sid }}" name="sid">
+          <input type="hidden" value="1" name="download">
+          <input type="submit" class="btn btn-success" id="download" value="Download Clean Results">
+      </form>
+  </div>
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <!-- JQuery -->
+    <script language="javascript" src="bootstrap/js/jquery.js"></script>
+    <script language="javascript" src="bootstrap/js/jquery-ui.js"></script>
+
+    <!-- Bootstrap -->
+    <script>window.jQuery || document.write('<script src="bootstrap/assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="bootstrap/assets/js/docs.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="bootstrap/assets/js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- Local Code -->
+    <script language="javascript" src="bootstrap/js/fitter.js"></script>
+    <script language="javascript" src="bootstrap/js/index.js"></script>
+  </body>
+</html>

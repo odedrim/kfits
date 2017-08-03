@@ -8,4 +8,5 @@ urlpatterns = [
     urls.url(r'^bootstrap/.*$', views.bootstrap, name='bootstrap'),
     urls.url(r'^backend$', views.backend, name='fbackend'),
     urls.url(r'^upload_text.html?$', views.upload_text, name='upload_text'),
+    urls.url(r'^get.htm?$', views.get_past_results, name='get_past_results'),
 ]

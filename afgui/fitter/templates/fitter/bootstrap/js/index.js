@@ -207,6 +207,8 @@ $(document).ready(function() {
         } else {
             var filename = 'unknown';
         }
+        var sid = $('#input_path').val().slice(-36,-4);
+        $('#dlink').html('Session ID: <a href=get.htm?sid=' + sid + '>' + sid + '</a> (Valid for 24 hours)');
         window.location = 'backend?function=get_clean_data&fnames=' + $('#input_path').val() + '&model=' + $('#model_choice').val() + '&noise_threshold=' + $('#threshold').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&approx_start=' + $('#approx_start').css('left').slice(0,-2) + '&output_fnames=' + filename + '_clean.csv' + ($('#noise_only_above').is(':checked') ? '&noise_only_above' : '') + ($('#reaches_plateau').is(':checked') ? '&search_for_end' : '');
     });
 });
