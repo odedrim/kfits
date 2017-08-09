@@ -185,6 +185,15 @@ $(document).ready(function() {
         }
     });
 
+    $('.navbar-brand').bind('click', function() {
+        $('#m_home').click();
+    });
+    $('.dropdown').bind('click', function() {
+        $('.overall').hide();
+        $('.topnav_btn').removeClass('active');
+        $('#m_home').addClass('active');
+    });
+
     $('#threshold').on('input', function() {
         $('#clean_data').attr('disabled', false);
     });

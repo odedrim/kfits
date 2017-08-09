@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.conf import urls
 from django.contrib import admin
+from . import views
 
 urlpatterns = [
     urls.url(r'^admin/', admin.site.urls),
     urls.url(r'^fitter/', urls.include('fitter.urls')),
+    urls.url(r'^$', views.index, name='index'),
+    urls.url(r'^index.html?$', views.index, name='index'),
 ]

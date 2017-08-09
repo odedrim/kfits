@@ -26,32 +26,33 @@ If you use `kfits` (or `kfits_server` with port 8000), *Kfits* will be accessibl
 
 # Installation Instructions
 
-Executive Summary: `pip install kfits`
+***Executive Summary*** First of all try: `pip install kfits`
+If that failed, follow the instructions below.
 
 ## 1 Get Python 2.7
 
-If you already have Python 2 (2.6 or later, but not 3.x) installed, skip to step 2. If you have both Python 2 and Python 3 installed, that's fine too. If you're working on a linux system, chances are you already have Python 2.7 installed.
+If you already have Python 2 (2.6 or later, **but not 3.x**) installed, skip to step 2. If you have both Python 2 and Python 3 installed, that's fine too. If you're working on a linux system, chances are you already have Python 2.7 installed.
 Otherwise, follow the instructions on [this official download page](https://www.python.org/downloads/) to download and install Python 2.7. Note that Python 3 will not work for this software, so don't be tempted ;)
 For Windows and MacOS, you may choose to work with [ActiveState ActivePython](https://www.activestate.com/activepython/downloads) or another distribution. As long as it's python 2.7, it's fine.
 
 ## 2 Install pip - the python package installer
 If you are certain you have pip installed, you may skip to step 3.
 Otherwise, follow the instructions on the [pip installation page](https://pip.pypa.io/en/stable/installing/).
-Shortly, depending on your system, it should be as easy as running (Fedora <22):
+Shortly, depending on your system, it should be as easy as running (on Fedora <22):
 ```
 sudo yum upgrade python-setuptools
 sudo yum install python-pip python-wheel
 ```
-Or (Fedora >=22):
+Or (on Fedora >=22):
 ```
 sudo dnf upgrade python-setuptools
 sudo dnf install python-pip python-wheel
 ````
-Or (Debian / Ubuntu):
+Or (on Debian / Ubuntu):
 ```
 sudo apt-get install python-pip
 ```
-Or (Windows or any other system):
+Or (on Windows or any other system):
 Download [get_pip.py](https://bootstrap.pypa.io/get-pip.py) and run `python get_pip.py` in the folder you downloaded it to.
 
 ## 3 Get the numerical (NumPy) and scientific (SciPy) python packages
@@ -71,7 +72,7 @@ On a **Windows** system, you may prefer to download pre-compiled NumPy from [thi
 Once you chose your method and you think you have NumPy installed, open a python terminal and type `import numpy`. If no error message appears - you're finally done with this step, and almost ready to install _Kfits_ :)
 
 ### 3.2 Install SciPy
-Once you successfuly installed numpy, installing scipy should be a piece of cake. Whatever was your last step for installing numpy (e.g. `pip install numpy` or downloading from [the unofficial binaries page](http://www.lfd.uci.edu/~gohlke/pythonlibs/)) - do exactly the same for scipy.
+Once you successfuly installed numpy, installing scipy should be a piece of cake. Whatever was your last step for installing numpy (e.g. `pip install numpy` or downloading from [the unofficial binaries page](http://www.lfd.uci.edu/~gohlke/pythonlibs/)) - do exactly the same for scipy. On linux-based systems, `sudo apt-get install python-scipy` may be your best bet.
 Once you have scipy successfully installed, you should be able to type in `import scipy` in a python terminal and receive no error messages when you press ENTER.
 
 ## 4 Download and Install *Kfits*
@@ -79,7 +80,9 @@ Finally, everything is prepared and you can download and install *Kfits*.
 There is more than one way to do this, and you may choose whichever you prefer. We think the first is the simplest and most straight-forward method, but really, feel free to use others. We won't be offended. Really.
 
 ### *Via* pip
-`pip install kfits`
+```
+pip install kfits
+```
 Seriously. That's it.
 
 ### From source
