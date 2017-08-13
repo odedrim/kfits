@@ -22,13 +22,15 @@ function fig_cleanup() {
 }
 
 function get_clean_coords(which) {
-    x1 = parseInt($('#' + which + '_dragline1').css('left').slice(0,-2)) + 5;
-    y1 = parseInt($('#' + which + '_dragline1').css('top').slice(0,-2)) + 5;
-    x2 = parseInt($('#' + which + '_dragline2').css('left').slice(0,-2)) + 5;
-    y2 = parseInt($('#' + which + '_dragline2').css('top').slice(0,-2)) + 5;
-    x3 = parseInt($('#' + which + '_dragline3').css('left').slice(0,-2)) + 5;
-    y3 = parseInt($('#' + which + '_dragline3').css('top').slice(0,-2)) + 5;
-    return {x1:x1, y1:y1, x2:x2, y2:y2, x3:x3, y3:y3};
+    var retval = {};
+    var count = parseInt($('#num_dragpoints').val());
+    for (var i=1; i<=count; i++) {
+        x = parseInt($('#' + which + '_dragline' + i).css('left').slice(0,-2)) + 5;
+        retval['x'+i] = x;
+        y = parseInt($('#' + which + '_dragline' + i).css('top').slice(0,-2)) + 5;
+        retval['y'+i] = y;
+    }
+    return retval
 }
 
 function set_progress(bar, value, text) {
@@ -61,6 +63,59 @@ function clear_user_message() {
     $('#input_message_user').attr('class', 'hidden');
 }
 
+function update_draglines() {
+    coords = get_clean_coords('top');
+    var line = '';
+    var count = parseInt($('#num_dragpoints').val());
+    for (var i=1; i<=count; i++) {
+        line += (i==1 ? 'M ' : 'L ') + coords['x'+i] + ' ' + coords['y'+i];
+    }
+    $('#top_dragline').attr('d',line);
+    coords = get_clean_coords('bottom');
+    var line = '';
+    for (var i=1; i<=count; i++) {
+        line += (i==1 ? 'M ' : 'L ') + coords['x'+i] + ' ' + coords['y'+i];
+    }
+    $('#bottom_dragline').attr('d',line);
+}
+
+function create_draglines(count) {
+    var botdragline_top = (height - 5) + 'px';
+    $('#top_dragpoints').html('');
+    $('#bottom_dragpoints').html('');
+    for (var i=1; i<=count; i++) {
+        $('<div/>', {
+            id: 'top_dragline' + i,
+            class: "smallcirc",
+        }).appendTo($('#top_dragpoints')).css({"background-color": "darkgreen",
+                                               "left":parseInt(width*(i-1)/(count-1))+"px",
+                                               "top":"0px"});
+        $('<div/>', {
+            id: 'bottom_dragline' + i,
+            class: "smallcirc",
+        }).appendTo($('#bottom_dragpoints')).css({"background-color": "darkred",
+                                               "left":parseInt(width*(i-1)/(count-1))+"px",
+                                               "top":botdragline_top});
+    }
+    // update coordinates
+    update_draglines();
+    // make draggable
+    $('.smallcirc').draggable({
+        containment: "#fig_h_orig",
+        drag: function() {
+            update_draglines();
+        },
+        stop: function() {
+            var max_left = parseInt($('#fig1').attr('data-mywidth'));
+            var left = $(this).css('left');
+            if (left.slice(0,-2) > max_left) {
+                $(this).css('left',max_left+'px');
+                update_draglines();
+            }
+        }
+    });
+}
+
 function run_analysis() {
     // cleanup everything
     fig_cleanup();
@@ -70,17 +125,8 @@ function run_analysis() {
         width = parseInt($('#fig1').attr('data-mywidth'));
         height = parseInt($('#fig1').attr('data-myheight'));
         // create draglines
-        $('#top_dragline1').css({"left":"0px", "top":"0px"}).show();
-        $('#top_dragline2').css({"left":parseInt(width/2)+"px", "top":"0px"}).show();
-        $('#top_dragline3').css({"left":width+"px", "top":"0px"}).show();
-        coords = get_clean_coords('top');
-        $('#top_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
-        var botdragline_top = (height - 5) + 'px';
-        $('#bottom_dragline1').css({"left":"0px", "top":botdragline_top}).show();
-        $('#bottom_dragline2').css({"left":parseInt(width/2)+"px", "top":botdragline_top}).show();
-        $('#bottom_dragline3').css({"left":width+"px", "top":botdragline_top}).show();
-        coords = get_clean_coords('bottom');
-        $('#bottom_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
+        var count = parseInt($('#num_dragpoints').val());
+        create_draglines(count);
         // move to original curve view
         $('#fig_b_orig').click();
         $('#gross_filter').show();
@@ -94,11 +140,19 @@ function run_analysis() {
     img.appendTo($('#fig1'));
 }
 
+function get_formatted_coords(which) {
+    coords = get_clean_coords(which);
+    var text_coords = '';
+    var count = parseInt($('#num_dragpoints').val());
+    for (var i=1; i<=count; i++) {
+        text_coords += '(' + coords['x'+i] + ',' + coords['y'+i] + '),';
+    }
+    return text_coords.slice(0,-1);
+}
+
 function clean_data(callback, threshold) {
-    coords = get_clean_coords('top');
-    var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-    coords = get_clean_coords('bottom');
-    var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
+    var text_top_coords = get_formatted_coords('top');
+    var text_bottom_coords = get_formatted_coords('bottom');
     if (typeof threshold == 'undefined') {
         var func = 'clean_data_optimise_noise_threshold';
     } else {

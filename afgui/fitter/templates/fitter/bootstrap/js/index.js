@@ -16,24 +16,15 @@ $(document).ready(function() {
         }
     });
 
-    $('.smallcirc').draggable({
-        containment: "#fig_h_orig",
-        drag: function() {
-            coords = get_clean_coords('top');
-            $('#top_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
-            coords = get_clean_coords('bottom');
-            $('#bottom_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
-        },
-        stop: function() {
-            var max_left = parseInt($('#fig1').attr('data-mywidth'));
-            var left = $(this).css('left');
-            if (left.slice(0,-2) > max_left) {
-                $(this).css('left',max_left+'px');
-                coords = get_clean_coords('top');
-                $('#top_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
-                coords = get_clean_coords('bottom');
-                $('#bottom_dragline').attr('d','M ' + coords.x1 + ' ' + coords.y1 + ' L ' + coords.x2 + ' ' + coords.y2 + ' L ' + coords.x3 + ' ' + coords.y3);
-            }
+    $('#num_dragpoints').change(function() {
+        if ($(this).val() > 9) {
+            $(this).val(9);
+        } else if ($(this).val() < 2) {
+            $(this).val(2);
+        }
+        // recreate draglines iff they are already visible (otherwise they will be created later, no worries...)
+        if (($('#top_dragline1').length > 0) && ($('#top_dragline1').css('display') != "none")) {
+            create_draglines($(this).val());
         }
     });
 
@@ -136,10 +127,8 @@ $(document).ready(function() {
 
     $('#gross_filter').bind('click', function() {
         if (is_ok_to_run()) {
-            coords = get_clean_coords('top');
-            var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-            coords = get_clean_coords('bottom');
-            var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
+            var text_top_coords = get_formatted_coords('top');
+            var text_bottom_coords = get_formatted_coords('bottom');
             $('#fig2').html('<img src="backend?function=plot_data&fnames=' + $('#input_path').val() + '&threshold_points=' + text_top_coords + '&rev_threshold_points=' + text_bottom_coords + '&_=' + new Date().getTime() + '">');
             $('#approx_start').show();
             $('#fig_b_filt').click();
@@ -207,10 +196,8 @@ $(document).ready(function() {
     });
 
     $('#get_clean_data').bind('click', function() {
-        coords = get_clean_coords('top');
-        var text_top_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
-        coords = get_clean_coords('bottom');
-        var text_bottom_coords = '(' + coords.x1 + ',' + coords.y1 + '),(' + coords.x2 + ',' + coords.y2 + '),(' + coords.x3 + ',' + coords.y3 + ')';
+        var text_top_coords = get_formatted_coords('top');
+        var text_bottom_coords = get_formatted_coords('bottom');
         if ($('#fdata').get(0).files.length) {
             var filename = $('#fdata').get(0).files[0].name;
         } else {

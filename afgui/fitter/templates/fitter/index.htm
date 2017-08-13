@@ -135,6 +135,8 @@
       <br>
       <input type="checkbox" id="reaches_plateau" value="reaches_plateau">
       Process Reached Plateau During Measurement
+      <br>
+      Number of points in boundary lines: &nbsp; &nbsp; <input type="number" id="num_dragpoints" value="3" min="2" max="9">
       </p>
 
       <div class="page-header">
@@ -147,17 +149,21 @@
       </ul>
       <div id="fig_h_orig" class="fig_head">
           <span id="fig1" data-mywidth="{{ width }}" data-myheight="{{ height }}"></span>
-          <div id="top_dragline1" class="smallcirc" style="background-color:darkgreen; display:none;"></div>
-          <div id="top_dragline2" class="smallcirc" style="background-color:darkgreen; display:none;"></div>
-          <div id="top_dragline3" class="smallcirc" style="background-color:darkgreen; display:none;"></div>
+          <span id="top_dragpoints">
+              <div id="top_dragline1" class="smallcirc" style="background-color:darkgreen; display:none;"></div>
+              <div id="top_dragline2" class="smallcirc" style="background-color:darkgreen; display:none;"></div>
+              <div id="top_dragline3" class="smallcirc" style="background-color:darkgreen; display:none;"></div>
+          </span>
           <svg style="position:absolute;height:{{ height }}px;width:{{ width }}px;left:0;top:0;">
               <g>
                 <path id="top_dragline" style="stroke:darkgreen;fill:none;" d="">
               </g>
           </svg>
-          <div id="bottom_dragline1" class="smallcirc" style="background-color:darkred; display:none;"></div>
-          <div id="bottom_dragline2" class="smallcirc" style="background-color:darkred; display:none;"></div>
-          <div id="bottom_dragline3" class="smallcirc" style="background-color:darkred; display:none;"></div>
+          <span id="bottom_dragpoints">
+              <div id="bottom_dragline1" class="smallcirc" style="background-color:darkred; display:none;"></div>
+              <div id="bottom_dragline2" class="smallcirc" style="background-color:darkred; display:none;"></div>
+              <div id="bottom_dragline3" class="smallcirc" style="background-color:darkred; display:none;"></div>
+          </span>
           <svg style="position:absolute;height:{{ height }}px;width:{{ width }}px;left:0;top:0;">
               <g>
                 <path id="bottom_dragline" style="stroke:darkred;fill:none;" d="">
