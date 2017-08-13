@@ -19,7 +19,7 @@ Dana: danare AT mail.huji.ac.il
 # Usage
 
 Once you have *Kfits* installed on your system, simply type `kfits` in a command line / terminal window (on Windows: Command Prompt or the Windows Run command).  
-To act as a server for other computers on the local network, use `kfits_server` instead. First, edit the file <Kfits Directory>/afgui/afgui/settings.py and add your IP address(es) to ALLOWED_HOSTS. Then run `kfits_server` and type in the IP interface you would like to serve on (0.0.0.0 for all interfaces) and the port to serve on (8000 is usually fine) as prompted.  
+To act as a server for other computers on the local network, use `kfits_server` instead. First, edit the file &lt;Kfits Directory&gt;/afgui/afgui/settings.py and add your IP address(es) to ALLOWED_HOSTS. Then run `kfits_server` and type in the IP interface you would like to serve on (0.0.0.0 for all interfaces) and the port to serve on (8000 is usually fine) as prompted.  
 If you use `kfits` (or `kfits_server` with port 8000), *Kfits* will be accessible *via* the URL `http://127.0.0.1:8000/fitter/`. In either case, a browser window should open at the correct address, and the graphical user interface will guide you through the workflow of *Kfits*. The 'Instructions' button on the top of the screen will lead you to a detailed description of the workflow, as well as instructions on how to extend the capabilities of the software.
 
 ---
