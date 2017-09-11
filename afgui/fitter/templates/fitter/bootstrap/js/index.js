@@ -105,7 +105,7 @@ $(document).ready(function() {
 
     $('.loadExample').click(function() {
         $('#fdata').attr('class', 'btn btn-success');
-        $("#input_path").val($(this).attr('path'));
+        $("#input_path").val($(this).attr('data-x-path'));
         run_analysis();
     });
 

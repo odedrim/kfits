@@ -47,7 +47,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <span class="navbar-brand">Aggregation Data Fitter</a>
+          <span class="navbar-brand">Aggregation Data Fitter</span>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
@@ -75,7 +75,7 @@
     <nav class="navbar navbar-inverse navbar-fixed-bottom">
       <div class="container">
         <div class="navbar-header">
-            <a class="navbar-brand" href="http://www.reichmannlab.com" text-align="center"><font size=3>Created by Oded Rimon, Reichmann Lab, HUJI, Jerusalem, Israel, 2016</font></a>
+            <a class="navbar-brand" href="http://www.reichmannlab.com" style="font-size: 15px;">Created by Oded Rimon, Reichmann Lab, HUJI, Jerusalem, Israel, 2016</a>
         </div>
       </div>
     </nav>
@@ -104,10 +104,10 @@
         <h1>Input and Parameters</h1>
       </div>
       <p>
-          <button class="btn btn-info loadExample" path="{{ example1 }}">Load Example 1</button>
-          <button class="btn btn-info loadExample" path="{{ example2 }}">Load Example 2</button>
-          <button class="btn btn-info loadExample" path="{{ example3 }}">Load Example 3</button>
-      </p>
+          <button class="btn btn-info loadExample" data-x-path="{{ example1 }}">Load Example 1</button>
+          <button class="btn btn-info loadExample" data-x-path="{{ example2 }}">Load Example 2</button>
+          <button class="btn btn-info loadExample" data-x-path="{{ example3 }}">Load Example 3</button>
+      </p><p>
         <form enctype="multipart/form-data">
             {% csrf_token %}
             <input id="fdata" name="fdata" type="file" class="btn btn-primary" style="display:inline-block;" />
@@ -149,24 +149,24 @@
       </ul>
       <div id="fig_h_orig" class="fig_head">
           <span id="fig1" data-mywidth="{{ width }}" data-myheight="{{ height }}"></span>
-          <span id="top_dragpoints">
+          <div id="top_dragpoints">
               <div id="top_dragline1" class="smallcirc" style="background-color:darkgreen; display:none;"></div>
               <div id="top_dragline2" class="smallcirc" style="background-color:darkgreen; display:none;"></div>
               <div id="top_dragline3" class="smallcirc" style="background-color:darkgreen; display:none;"></div>
-          </span>
+          </div>
           <svg style="position:absolute;height:{{ height }}px;width:{{ width }}px;left:0;top:0;">
               <g>
-                <path id="top_dragline" style="stroke:darkgreen;fill:none;" d="">
+                <path id="top_dragline" style="stroke:darkgreen;fill:none;" d="" />
               </g>
           </svg>
-          <span id="bottom_dragpoints">
+          <div id="bottom_dragpoints">
               <div id="bottom_dragline1" class="smallcirc" style="background-color:darkred; display:none;"></div>
               <div id="bottom_dragline2" class="smallcirc" style="background-color:darkred; display:none;"></div>
               <div id="bottom_dragline3" class="smallcirc" style="background-color:darkred; display:none;"></div>
-          </span>
+          </div>
           <svg style="position:absolute;height:{{ height }}px;width:{{ width }}px;left:0;top:0;">
               <g>
-                <path id="bottom_dragline" style="stroke:darkred;fill:none;" d="">
+                <path id="bottom_dragline" style="stroke:darkred;fill:none;" d="" />
               </g>
           </svg>
           <button id="gross_filter" type="button" class="btn btn-success btn-offig" style="display:none;">Filter Datapoints Above Green Line and Below Red Line</button>
@@ -215,7 +215,7 @@
       <div id="results" class="row">
         <div class="col-md-6">
             Noise Threshold:&nbsp;&nbsp;&nbsp;&nbsp;<input id="threshold" style="width:50px;" value="15" />&nbsp;&nbsp;
-            <button id="clean_data" type="button" class="btn btn-info" style="width:40%;" disabled=true>Apply Threshold</button>
+            <button id="clean_data" type="button" class="btn btn-info" style="width:40%;" disabled>Apply Threshold</button>
             <div id="fig4" style="margin-top:10px;"></div>
             <button id="get_clean_data" type="button" class="btn btn-success" style="width:100%;">Download Clean Data</button>
             <small style="padding: 10%"><em id="dlink"></em></small>
@@ -260,9 +260,9 @@
             <h3>Flags and Parameters</h3>
             <p>After fitting the measured data with the chosen model function, <em>Kfits</em> removes data points that are far from the theoretical curve ("TC"). The threshold (noise threshold, "NS") for the distance from the curve is estimated by the algorithm described above and can be overridden by the user. When the user choses not the set the "Noise is Always Above Signal" flag, every point residing outside of the TC &pm; NS band is marked for removal and removed; if the flag is set, only points with recorded values larger than TC + NS are removed. This flag is recommended for light scattering measurements, where air bubbles randomly cause excessive scattering.</p>
             <h3>Workflow</h3>
-            <p><b><i>Step 1.</i> Loading Data and Setting Parameters.</b> The user choses a file and uploads it to the system, which plots the original measurement to the screen. The user can then choose the parameters for the fit. These include the kinetic model to be used (an automatic best-fit option is available) and the "Noise is Always Above Signal" flag, explained in the figure below. Finally, the setting "Process Reached Plateau During Measurement" determines whether the software should search for a period of plateau at the end of the measurement, after the end of the kinetics - or not; if in doubt, try both options and see which one produces a better fit.<br>
-            <center><img src="bootstrap/FigS1.png" /></center><br>
-            <b><i>Step 2.</i> Setting the Margins of the Signal.</b> In many cases, certain areas of the kinetic plot contain only noise, easily identifiable by the researcher. Two adjustable two-segment lines represent "only noise above this line" (green) and "only noise below this line" (red), allowing you to remove obvious noise.<br>
+            <p><b><i>Step 1.</i> Loading Data and Setting Parameters.</b> The user choses a file and uploads it to the system, which plots the original measurement to the screen. The user can then choose the parameters for the fit. These include the kinetic model to be used (an automatic best-fit option is available) and the "Noise is Always Above Signal" flag, explained in the figure below. Finally, the setting "Process Reached Plateau During Measurement" determines whether the software should search for a period of plateau at the end of the measurement, after the end of the kinetics - or not; if in doubt, try both options and see which one produces a better fit.<br></p>
+            <div style="text-align:center;"><img src="bootstrap/FigS1.png" alt="Figure S1 of the Bioinformatics paper, presenting the meaning of the 'noise above signal' flag in Kfits" /></div><br>
+            <p><b><i>Step 2.</i> Setting the Margins of the Signal.</b> In many cases, certain areas of the kinetic plot contain only noise, easily identifiable by the researcher. Two adjustable two-segment lines represent "only noise above this line" (green) and "only noise below this line" (red), allowing you to remove obvious noise.<br>
             <b><i>Step 3.</i> Setting Approximate Start of Kinetics Curve.</b> Kinetic measurements often start with a baseline measurement, followed by addition of the components that create the observable signal. This setting has two effects: measurements before the chosen time point are used by the software to determine baseline values; and the model fit is assessed only according to data points after this point.<br>
             <b><i>Step 4.</i> Fitting a Function to the Data.</b> The software will now try to fit the chosen model to the data using non-linear least-squares regression. It will then try to optimise the noise threshold, which can also be manually set by the user. Any datapoint residing outside the "signal band" will subsequently be removed.<br>
             <b><i>Step 5.</i> Downloading Clean Data and Reviewing Kinetic Parameters.</b> At this final step, you can review your clean data as well as the calculated kinetic parameters. Then you can potentially adjust the noise threshold to achieve cleaner results or reduce loss of data, as well as download the clean results in textual format to your computer.</p>
@@ -323,8 +323,8 @@
 
     <!-- Placed at the end of the document so the pages load faster -->
     <!-- JQuery -->
-    <script language="javascript" src="bootstrap/js/jquery.js"></script>
-    <script language="javascript" src="bootstrap/js/jquery-ui.js"></script>
+    <script src="bootstrap/js/jquery.js"></script>
+    <script src="bootstrap/js/jquery-ui.js"></script>
 
     <!-- Bootstrap -->
     <script>window.jQuery || document.write('<script src="bootstrap/assets/js/vendor/jquery.min.js"><\/script>')</script>
@@ -334,7 +334,7 @@
     <script src="bootstrap/assets/js/ie10-viewport-bug-workaround.js"></script>
 
     <!-- Local Code -->
-    <script language="javascript" src="bootstrap/js/fitter.js"></script>
-    <script language="javascript" src="bootstrap/js/index.js"></script>
+    <script src="bootstrap/js/fitter.js"></script>
+    <script src="bootstrap/js/index.js"></script>
   </body>
 </html>
