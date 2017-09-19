@@ -7,7 +7,7 @@ if platform.system() != 'Windows':
     top_fnames = ['.'+x for x in top_fnames]
 
 setup(name = 'kfits',
-      version = '1.2',
+      version = '1.2.1',
       description = 'Kinetics Fitting Software',
       long_description = file('README.md','r').read(),
       author = 'Oded Rimon',
