@@ -227,7 +227,8 @@ def find_aggregation_initiation(data, approx=120, debug=False):
     """
     if debug:
         _debug(dict(data_len=len(data), beginning=data[:10], approx=approx))
-    RANGE_WIDTH = 40
+    # range width changed from a constant 40 seconds to 3% of the timespan
+    RANGE_WIDTH = int(math.ceil(0.03 * len(data)))
     # find last 30 seconds before approximate init
     end_idx = closest_t(data, approx)
     if end_idx is None:
@@ -255,7 +256,7 @@ def find_aggregation_initiation(data, approx=120, debug=False):
         _debug(dict(end_idx=end_idx, best_idx=best_idx, smean=smean))
     return better_mean, data[best_idx][0]
 
-def find_apparent_maximum(data, range_to_fit=120, minimal_t2=350., debug=False):
+def find_apparent_maximum(data, minimal_t2=350., debug=False):
     """
     Find the point where aggregation reached its apparent maximum.
     This is often long before the end of the trace, as larger aggregates
@@ -264,8 +265,6 @@ def find_apparent_maximum(data, range_to_fit=120, minimal_t2=350., debug=False):
 
     @param data: The aggregation data
     @type data: List of 2-tuples
-    @param range_to_fit: How many timepoints at the end of the trace to fit with line (default: 120, i.e. 2 min)
-    @type range_to_fit: int
     @param minimal_t2: Minimal value for t2, important for low-aggregation samples (default: 350s)
     @type minimal_t2: number
     @param debug: Show debug information? (default: no)
@@ -275,7 +274,8 @@ def find_apparent_maximum(data, range_to_fit=120, minimal_t2=350., debug=False):
     @rtype: tuple (float, float)
     """
     DEVIATIONS_FROM_LINE = 10. 
-    # fit final minute with line
+    # fit "final minute" with line
+    range_to_fit = int(math.ceil(len(data) * 0.05))
     to_fit = data[-range_to_fit:]
     popt, pcov = curve_fit(lambda x, a, b: a*x+b, [x[0] for x in to_fit], [x[1] for x in to_fit])
     a, b = popt
@@ -419,10 +419,12 @@ def fit_data(data, model='auto', approx_start=120, search_for_end=True, debug=Fa
     a, pcov = curve_fit(lambda x, a: a*x, [x[0]-t2 for x in to_fit], [x[1]-end_of_agg_curve for x in to_fit])
     a = float(a)
 
+    # calculate mean gap between measurements
+    mean_interval = (float(data[-1][0]) - data[0][0]) / len(data)
     # return fitted (simulated) data
-    simulated_data = [baseline for x in xrange(int(t1*2))] + \
-                     [baseline + fit_pair[0](x/2., *popt) for x in xrange(int((t2-t1)*2))] + \
-                     [(a*((x/2.)-t2)+end_of_agg_curve) for x in range(int(t2*2.)-1, int(2*max(data)[0]))]
+    simulated_data = [baseline for x in xrange(int(t1/mean_interval))] + \
+                     [baseline + fit_pair[0](x*mean_interval, *popt) for x in xrange(int((t2-t1)/mean_interval))] + \
+                     [(a*((x*mean_interval)-t2)+end_of_agg_curve) for x in range(int(t2/mean_interval)-1, int(max(data)[0]/mean_interval))]
     # prepare return value
     params = dict(model = model, t1 = t1, t2 = t2)
     for i, param_name in enumerate(fit_pair[2]):
@@ -446,13 +448,16 @@ def main(args):
     data = parse_fluorometer_csv(args[0], debug=True)
     _debug({'data length':len(data)})
     if len(args) > 1:
-        sim_data, params = fit_data(data, approx_start=int(args[1]), debug=True)
+        sim_data, params = fit_data(data, approx_start=float(args[1]), debug=True)
     else:
         sim_data, params = fit_data(data, debug=True)
     for item in params.iteritems():
         print '%s: %s' % item
+    # calculate mean gap between measurements
+    mean_interval = (float(data[-1][0]) - data[0][0]) / len(data)
+    # plot
     pyplot.plot([x[0] for x in data], [x[1] for x in data])
-    pyplot.plot([0.5*i for i in xrange(len(sim_data))], sim_data)
+    pyplot.plot([mean_interval*i for i in xrange(len(sim_data))], sim_data)
     pyplot.show()
     return 0
 
