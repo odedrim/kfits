@@ -53,7 +53,8 @@ def plot_data(fnames, threshold_points=None, rev_threshold_points=None):
     threshold_points = _calibrate_threshold_points(eval(threshold_points[0]), FIG_W, FIG_H) if threshold_points else None
     rev_threshold_points = _calibrate_threshold_points(eval(rev_threshold_points[0]), FIG_W, FIG_H) if rev_threshold_points else None
     # run
-    data = scipy.array(tfitter.parse_fluorometer_csv(fname, threshold_points, rev_threshold_points)).T
+    mean_interval, data = tfitter.parse_fluorometer_csv(fname, threshold_points, rev_threshold_points)
+    data = scipy.array(data).T
     return TO_JSON, tfitter.plot_to_svg(data[0], data[1], FIG_W, FIG_H), RETTYPE
 
 def _fit_data(fnames, model, threshold_points=None, rev_threshold_points=None, approx_start=None, search_for_end=True):
@@ -63,24 +64,24 @@ def _fit_data(fnames, model, threshold_points=None, rev_threshold_points=None, a
     rev_threshold_points = _calibrate_threshold_points(eval(rev_threshold_points[0]), FIG_W, FIG_H) if rev_threshold_points else None
     approx_start = float(approx_start[0])/FIG_W if approx_start else 0
     # run
-    data = tfitter.parse_fluorometer_csv(fname, threshold_points, rev_threshold_points)
-    sim_data, params = tfitter.fit_data(data, approx_start=approx_start*data[-1][0], search_for_end=search_for_end, model=model)
-    return data, sim_data, params
+    mean_interval, data = tfitter.parse_fluorometer_csv(fname, threshold_points, rev_threshold_points)
+    sim_data, params = tfitter.fit_data(data, mean_interval, approx_start=approx_start*data[-1][0], search_for_end=search_for_end, model=model)
+    return data, mean_interval, sim_data, params
 
 def fit_data(fnames, model, threshold_points=None, rev_threshold_points=None, approx_start=None, search_for_end=None):
     # prepare return type
     TO_JSON = False
     RETTYPE = 'image/svg+xml'
     # run
-    data, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start, search_for_end is not None)
+    data, mean_interval, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start, search_for_end is not None)
     adata = scipy.array(data).T
-    return TO_JSON, tfitter.plot_two_to_svg(adata[0], adata[1], [0.5*i for i in xrange(len(sim_data))], sim_data, FIG_W, FIG_H), RETTYPE
+    return TO_JSON, tfitter.plot_two_to_svg(adata[0], adata[1], [mean_interval*i for i in xrange(len(sim_data))], sim_data, FIG_W, FIG_H), RETTYPE
 
-def _clean_data_short(data, sim_data, noise_threshold, noise_only_above=True):
+def _clean_data_short(data, mean_interval, sim_data, noise_threshold, noise_only_above=True):
     if noise_only_above:
-        fltr = lambda (t,v): v-sim_data[int(t*2)] < noise_threshold
+        fltr = lambda (t,v): v-sim_data[int(t/mean_interval)] < noise_threshold
     else:
-        fltr = lambda (t,v): abs(v-sim_data[int(t*2)]) < noise_threshold
+        fltr = lambda (t,v): abs(v-sim_data[int(t/mean_interval)]) < noise_threshold
     new_data = filter(fltr, data)
     adata = scipy.array(new_data).T
     return adata, new_data
@@ -96,11 +97,11 @@ def _clean_data(fnames, model, noise_threshold, threshold_points=None, rev_thres
     else:
         raise ValueError("Noise threshold has illegal value %r" % noise_threshold[0])
     # run fitting
-    data, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start, search_for_end is not None)
+    data, mean_interval, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start, search_for_end is not None)
     # find basal level
     baseline = tfitter.find_absolute_baseline(data)
     # clean data
-    adata, new_data = _clean_data_short(data, sim_data, noise_threshold, noise_only_above)
+    adata, new_data = _clean_data_short(data, mean_interval, sim_data, noise_threshold, noise_only_above)
     return adata, new_data, baseline, params
 
 def clean_data(fnames, model, noise_threshold, threshold_points=None, rev_threshold_points=None, approx_start=None, noise_only_above=None, search_for_end=None):
@@ -120,13 +121,13 @@ def clean_data_optimise_noise_threshold(fnames, model, threshold_points=None, re
     # parse params
     noise_only_above = noise_only_above is not None
     # optimisation loop
-    data, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start, search_for_end is not None)
+    data, mean_interval, sim_data, params = _fit_data(fnames, model[0], threshold_points, rev_threshold_points, approx_start, search_for_end is not None)
     span = max(data, key=lambda (t,v):v)[1] - min(data, key=lambda (t,v):v)[1]
     noise_threshold = span / 3.
     ##last_reduction = 0
     for i in xrange(MAX_THRESHOLD_SEARCH_ITERATIONS):
-        adata1, new_data1 = _clean_data_short(data, sim_data, noise_threshold, noise_only_above)
-        adata2, new_data2 = _clean_data_short(data, sim_data, noise_threshold/2., noise_only_above)
+        adata1, new_data1 = _clean_data_short(data, mean_interval, sim_data, noise_threshold, noise_only_above)
+        adata2, new_data2 = _clean_data_short(data, mean_interval, sim_data, noise_threshold/2., noise_only_above)
         diff = set(new_data1) - set(new_data2)
         th2rem = set(data) - set(new_data2)
         # TODO: stop iteration if gain diminishes
